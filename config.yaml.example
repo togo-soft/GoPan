@@ -1,0 +1,54 @@
+environments:
+  # 是否开启调试输出
+  debug: true
+  # 服务地址端口配置
+  server: 0.0.0.0:7125
+  # JWT配置项
+  jwt:
+    # 自定义签名密钥 在任何场景都不应该流露
+    sign_key: R29QYW4=
+    # 强制使用HMAC-SHA族 [HS256 HS348 HS512] 默认 HS256
+    sign_method: HS256
+    # 签名发布者
+    sign_issuer: GoPan
+    # 签名主题
+    sign_subject: Login
+    # Token 有效时间 单位:秒
+    sign_expires: 3600
+  mysql:
+    # MySQL Data Source Name
+    # docker: docker run -it -d --name gopan  -p 33060:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=gopan mysql:latest --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    dsn: username:password@tcp(host:port)/gopan?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local
+    # 是否开启 ORM 的调试
+    debug: true
+  mongodb:
+    # MongoDB Data Source Name
+    # docker: docker run --name mongo -it -d -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=root -p 27017:27017 mongo:latest
+    dsn: mongodb://username:password@host:port
+    # 是否开启 MongoDB 的调试信息
+    debug: true
+  redis:
+    # Redis Data Source Name
+    # docker: docker run -d --name redis -p 6379:6379 redis --requirepass "root"
+    # 填写格式: password@host:port
+    dsn: password@host:port
+    # 是否开启 Redis 的调试信息
+    debug: true
+  # 文件相关配置项 项目运行后不可再修改 否则导致已经加密的文件无法解密
+  file:
+    # 文件加密时 使用对称加密 密钥为 upassword+salt salt为公共享有的 但在任何场景都不应该流露
+    salt: R29QYW4=
+    # 密钥轮转次数 文件密钥通过 PBKDF2 将salt hash进行iter次重复计算后返回32位的密钥 iter太大会影响效率
+    iter: 1024
+  # 邮件服务功能配置
+  email:
+    # 邮件发送服务STMP地址 host
+    server_host: smtp.yeah.net
+    # STMP端口
+    server_port: 465
+    # 发送者名称
+    from_email: test@yeah.net
+    # 发送者昵称别名
+    from_user: GoPan
+    # 发送者密码
+    from_password: key_xxxxxxx
