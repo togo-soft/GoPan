@@ -31,7 +31,22 @@ type UserRepoInterface interface {
 	// 重置忘记密码时 获得参数 检验是否有效
 	GetResetArgs(uuid string) (string, error)
 	//查询用户列表接口
-	FindMany() []*models.User
+	FindMany() ([]*models.User, error)
+	//用户数量统计
+	Census() (int64, error)
+	//用户禁用
+	DisabledUser(int64, bool) error
+}
+
+type GroupRepoInterface interface {
+	//添加组
+	AddGroup(*models.Group) (int64, error)
+	//修改组
+	UpdateGroup(*models.Group) (int64, error)
+	//删除组
+	DeleteGroup(int64) (int64, error)
+	//罗列组
+	GroupList() ([]*models.Group, error)
 }
 
 // FileRepoInterface 文件操作接口
@@ -39,7 +54,7 @@ type FileRepoInterface interface {
 	//上传文件
 	UploadFile(username string, file *models.File) error
 	//新建文件夹
-	CreateDir(username,dirname string,file *models.File) error
+	CreateDir(username, dirname string, file *models.File) error
 	//下载文件
 	DownloadFile(username string, id primitive.ObjectID) error
 	//删除文件
@@ -48,8 +63,14 @@ type FileRepoInterface interface {
 	DeleteDir(username string, id primitive.ObjectID) error
 	//修改文件名称
 	RenameFile(username, filename string, id primitive.ObjectID) error
+	//共享列表
+	ShareList(username string) ([]models.File, error)
+	//第三方查看共享文件信息
+	OTTHShareFile(username string, pid primitive.ObjectID) ([]models.File, error)
 	//共享文件
-	ShareFile(username string,id primitive.ObjectID) error
+	ShareFile(username string, id primitive.ObjectID, fks string) error
+	//取消共享文件
+	CancelShare(username string, id primitive.ObjectID) error
 	//查看文件夹数据
 	ListDir(username string, pid primitive.ObjectID) ([]models.File, error)
 	//查看根目录数据

@@ -11,6 +11,8 @@ environments:
     reset_expires: 3600
     # 自定义的公有盐[不能泄露] 场景: 用户ak的生成...
     salt: R29QYW4=
+    # 管理员密钥
+    admin_token: deaKjybmuvXLbo+DXnR8qSL9WYl5UDw0ij017GdCPaU=
   # JWT配置项
   jwt:
     # 自定义签名密钥 在任何场景都不应该流露

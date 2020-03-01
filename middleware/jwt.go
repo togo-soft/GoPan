@@ -12,22 +12,6 @@ import (
 // 参考: https://godoc.org/github.com/dgrijalva/jwt-go
 // 实践: https://www.jianshu.com/p/1f9915818992
 
-const (
-	//正常
-	TokenOK = 200
-	//异常
-	TokenError = 400
-	//头字段认证信息缺失
-	TokenMissHeader = 4900
-
-	//token超时
-	TokenExpired = 4901
-	//token格式错误
-	TokenMalformed = 4902
-	//token匹配uid失败
-	TokenTampered = 4903
-)
-
 // JWT jwt的配置结构 这些选项需要从配置文件中读取
 type JWT struct {
 	SigningKey     []byte                 //签名密钥
@@ -55,8 +39,8 @@ func JWTAuth() gin.HandlerFunc {
 		// 字段为空 请求非法
 		if auth == "" || uid == "" {
 			context.JSON(TokenError, gin.H{
-				"code": TokenMissHeader,
-				"message":  "Request header has no authorization field",
+				"code":    TokenMissHeader,
+				"message": "Request header has no authorization field",
 			})
 			context.Abort()
 			return
@@ -66,8 +50,8 @@ func JWTAuth() gin.HandlerFunc {
 		//认证非 Bearer 请求非法
 		if len(kv) != 2 || kv[0] != "Bearer" {
 			context.JSON(TokenError, gin.H{
-				"code": TokenMissHeader,
-				"message":  "Auth type invalid",
+				"code":    TokenMissHeader,
+				"message": "Auth type invalid",
 			})
 			context.Abort()
 			return
@@ -75,8 +59,8 @@ func JWTAuth() gin.HandlerFunc {
 		// token验证
 		if kv[1] == "" {
 			context.JSON(TokenError, gin.H{
-				"code": TokenMissHeader,
-				"message":  "token invalid",
+				"code":    TokenMissHeader,
+				"message": "token invalid",
 			})
 			context.Abort()
 			return
@@ -85,8 +69,8 @@ func JWTAuth() gin.HandlerFunc {
 		j := NewJWT()
 		if status, err := j.ParseToken(kv[1], utils.ParseStringToInt64(uid)); err != nil {
 			context.JSON(TokenError, gin.H{
-				"code": status,
-				"message":  err.Error(),
+				"code":    status,
+				"message": err.Error(),
 			})
 			context.Abort()
 			return

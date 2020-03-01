@@ -13,3 +13,9 @@ func Byte2Base64(key []byte) string {
 func String2Base64(str string) string {
 	return base64.StdEncoding.EncodeToString([]byte(str))
 }
+
+// Base64toString
+func Base64toString(str string) string {
+	result, _ := base64.StdEncoding.DecodeString(str)
+	return string(result)
+}

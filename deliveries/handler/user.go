@@ -55,8 +55,7 @@ func FindOne(this *gin.Context) {
 
 // FindMany 查看用户列表
 func FindMany(this *gin.Context) {
-	r := uuc.FindMany(this)
-	this.JSON(r.Code, r)
+	this.JSON(uuc.FindMany(this))
 }
 
 // Cancellation 删除用户
@@ -67,4 +66,18 @@ func Cancellation(this *gin.Context) {
 // ModifyInformation 修改用户
 func ModifyInformation(this *gin.Context) {
 	this.JSON(uuc.ModifyInformation(this))
+}
+
+func Census(this *gin.Context) {
+	this.JSON(uuc.Census(this))
+}
+
+// AuthAdminToken 管理员认证
+func AuthAdminToken(this *gin.Context) {
+	this.JSON(uuc.AuthAdminToken(this))
+}
+
+// DisabledUser 用户禁用
+func DisabledUser(this *gin.Context) {
+	this.JSON(uuc.DisabledUser(this))
 }

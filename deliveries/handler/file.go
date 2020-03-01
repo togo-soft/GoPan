@@ -37,9 +37,24 @@ func RenameFile(this *gin.Context) {
 	this.JSON(fuc.RenameFile(this))
 }
 
+// ShareList 共享列表
+func ShareList(this *gin.Context) {
+	this.JSON(fuc.ShareList(this))
+}
+
+// OTTHShareList 共享列表
+func OTTHShareList(this *gin.Context) {
+	this.JSON(fuc.OTTHShareFile(this))
+}
+
 // ShareFile 共享文件
 func ShareFile(this *gin.Context) {
 	this.JSON(fuc.ShareFile(this))
+}
+
+//取消共享
+func CancelShare(this *gin.Context) {
+	this.JSON(fuc.CancelShare(this))
 }
 
 // ListDir 查看当前文件夹文件列表

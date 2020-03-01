@@ -113,9 +113,16 @@ func (this *UserUC) SignIn(ctx *gin.Context) (int, *Response) {
 		user.Password = hex.EncodeToString(h.Sum(nil))
 		//查询是否存在
 		if has, user := ur.LoginExist(user.Username, user.Password); has {
+			//检测用户是否被禁用
+			if !user.Status {
+				return StatusServerError, &Response{
+					Code:    ErrorDatabaseQuery,
+					Message: "用户已被禁止登录",
+				}
+			}
 			//登陆成功
 			token := middleware.NewJWT().NewToken(user.Id, user.Username, user.Email, user.Phone)
-			//todo 更新user信息
+			//todo 更新user行为信息
 			//将token在data中返回
 			return StatusOK, &Response{
 				Code:    StatusOK,
@@ -261,7 +268,14 @@ func (this *UserUC) Profile(ctx *gin.Context) (int, *Response) {
 
 // Cancellation 用户自注销 删除账号逻辑
 func (this *UserUC) Cancellation(ctx *gin.Context) (int, *Response) {
-	id := utils.ParseStringToInt64(ctx.Query("id"))
+	qid := ctx.Query("id")
+	if qid == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "解析参数错误",
+		}
+	}
+	id := utils.ParseStringToInt64(qid)
 	if id, err := ur.Delete(id); err != nil {
 		//删除数据库操作失败
 		return StatusServerError, &Response{
@@ -316,9 +330,87 @@ func (this *UserUC) FindOne(ctx *gin.Context) (int, *Response) {
 }
 
 // FindMany ...
-func (this *UserUC) FindMany(ctx *gin.Context) *List {
-	return &List{
-		Code: StatusOK,
-		Data: ur.FindMany(),
+func (this *UserUC) FindMany(ctx *gin.Context) (int, *List) {
+	data, err := ur.FindMany()
+	if err != nil {
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseQuery,
+			Message: "数据库查询出错",
+		}
+	}
+	return StatusOK, &List{
+		Code:    StatusOK,
+		Message: "ok",
+		Data:    data,
+	}
+}
+
+// Census 用户数量统计
+func (this *UserUC) Census(ctx *gin.Context) (int, *Response) {
+	if count, err := ur.Census(); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseQuery,
+			Message: "无法获取数据",
+		}
+	} else {
+		return StatusOK, &Response{
+			Code:    StatusOK,
+			Message: "ok",
+			Data:    count,
+		}
+	}
+}
+
+// AuthAdminToken 验证管理员的token是否正确
+func (this *UserUC) AuthAdminToken(ctx *gin.Context) (int, *Response) {
+	var token = ctx.PostForm("token")
+	if token == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "解析参数错误",
+		}
+	}
+	var conf = utils.GetConfig()
+	if token != conf.User.AdminToken {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseQuery,
+			Message: "认证失败",
+		}
+	} else {
+		return StatusOK, &Response{
+			Code:    StatusOK,
+			Message: token,
+		}
+	}
+}
+
+// DisabledUser 用户禁用
+func (this *UserUC) DisabledUser(ctx *gin.Context) (int, *Response) {
+	qid := ctx.Query("id")
+	if qid == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "解析参数错误",
+		}
+	}
+	id := utils.ParseStringToInt64(qid)
+	//检测用户存不存在
+	u := ur.FindOneById(id)
+	if u == nil {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "解析参数错误,用户不存在",
+		}
+	}
+	if err := ur.DisabledUser(id, u.Status); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseUpdate,
+			Message: "数据库操作出错",
+			Data:    err,
+		}
+	}
+	return StatusOK, &Response{
+		Code:    StatusOK,
+		Message: utils.ParseInt64ToString(id),
 	}
 }

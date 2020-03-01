@@ -107,15 +107,28 @@ func (this *UserRepo) SetResetArgs(uuid string, uid, expires int64) error {
 	return err
 }
 
-// 重置忘记密码时 获得参数 检验是否有效
+// GetResetArgs 重置忘记密码时 获得参数 检验是否有效
 func (this *UserRepo) GetResetArgs(uuid string) (string, error) {
 	return rgo.Get(uuid).Result()
 }
 
-func (this *UserRepo) FindMany() []*models.User {
+// FindMany 用户列表
+func (this *UserRepo) FindMany() ([]*models.User, error) {
 	all := make([]*models.User, 0)
-	if err := engine.Find(&all); err != nil {
-		log.Fatal("find all user error:", err)
-	}
-	return all
+	err := engine.Find(&all)
+	return all, err
+}
+
+// Census 统计用户表的数量
+func (this *UserRepo) Census() (int64, error) {
+	return engine.Count(new(models.User))
+}
+
+// DisabledUser 用户禁用
+func (this *UserRepo) DisabledUser(uid int64, status bool) error {
+	user := new(models.User)
+	user.Status = !status
+	_, err := engine.Id(uid).Cols("status").Update(user)
+	log.Println("change user status:", err)
+	return err
 }

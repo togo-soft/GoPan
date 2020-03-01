@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math"
@@ -74,7 +75,7 @@ func (this *FileUC) CreateDir(ctx *gin.Context) (int, *Response) {
 			Message: "参数缺失",
 		}
 	}
-	fid,_ := primitive.ObjectIDFromHex(id)
+	fid, _ := primitive.ObjectIDFromHex(id)
 	var file = &models.File{
 		Pid:        fid,
 		Id:         primitive.NewObjectID(),
@@ -84,7 +85,7 @@ func (this *FileUC) CreateDir(ctx *gin.Context) (int, *Response) {
 		IsShare:    false,
 		Privacy:    false,
 	}
-	if err := fr.CreateDir(username,dirname,file); err != nil {
+	if err := fr.CreateDir(username, dirname, file); err != nil {
 		return StatusServerError, &Response{
 			Code:    ErrorDatabaseDelete,
 			Message: "删除数据失败",
@@ -138,8 +139,8 @@ func (this *FileUC) RenameFile(ctx *gin.Context) (int, *Response) {
 			Message: "参数缺失",
 		}
 	}
-	fid,_ := primitive.ObjectIDFromHex(id)
-	if err := fr.RenameFile(username,dirname,fid); err != nil {
+	fid, _ := primitive.ObjectIDFromHex(id)
+	if err := fr.RenameFile(username, dirname, fid); err != nil {
 		return StatusServerError, &Response{
 			Code:    ErrorDatabaseDelete,
 			Message: "删除数据失败",
@@ -152,6 +153,77 @@ func (this *FileUC) RenameFile(ctx *gin.Context) (int, *Response) {
 	}
 }
 
+func (this *FileUC) ShareList(ctx *gin.Context) (int, *List) {
+	username := ctx.Query("username")
+	if username == "" {
+		return StatusClientError, &List{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	if list, err := fr.ShareList(username); err != nil {
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseDelete,
+			Message: "获取共享列表失败",
+			Data:    err.Error(),
+		}
+	} else {
+		return StatusOK, &List{
+			Code:    StatusOK,
+			Message: "ok",
+			Data:    list,
+			Count:   len(list),
+		}
+	}
+}
+
+func (this *FileUC) OTTHShareFile(ctx *gin.Context) (int, *List) {
+	key := ctx.Query("key")
+	if key == "" {
+		return StatusClientError, &List{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	//解析key
+	var fsk = &models.FileShareKey{}
+	_ = json.Unmarshal([]byte(utils.Base64toString(key)), fsk)
+	id, _ := primitive.ObjectIDFromHex(fsk.Id)
+	//先获取文件信息
+	f, err := fr.FileInfo(fsk.Username, id)
+	if err != nil {
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseDelete,
+			Message: "未找到共享文件",
+			Data:    err.Error(),
+		}
+	}
+	//不是目录 直接返回该文件信息
+	if !f.IsDir {
+		return StatusOK, &List{
+			Code:    StatusOK,
+			Message: f.FileName,
+			Data:    []models.File{*f},
+			Count:   1,
+		}
+	}
+	//是目录 返回该目录信息
+	if list, err := fr.OTTHShareFile(fsk.Username, id); err != nil {
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseDelete,
+			Message: "获取共享列表失败",
+			Data:    err.Error(),
+		}
+	} else {
+		return StatusOK, &List{
+			Code:    StatusOK,
+			Message: f.FileName,
+			Data:    list,
+			Count:   len(list),
+		}
+	}
+}
+
 func (this *FileUC) ShareFile(ctx *gin.Context) (int, *Response) {
 	username := ctx.Query("username")
 	id := ctx.Query("id")
@@ -161,11 +233,39 @@ func (this *FileUC) ShareFile(ctx *gin.Context) (int, *Response) {
 			Message: "参数缺失",
 		}
 	}
-	fid,_ := primitive.ObjectIDFromHex(id)
-	if err := fr.ShareFile(username,fid); err != nil {
+	fid, _ := primitive.ObjectIDFromHex(id)
+	fsks, _ := json.Marshal(models.FileShareKey{
+		Username: username,
+		Id:       id,
+	})
+	fsk := utils.String2Base64(string(fsks))
+	if err := fr.ShareFile(username, fid, fsk); err != nil {
 		return StatusServerError, &Response{
 			Code:    ErrorDatabaseDelete,
-			Message: "删除数据失败",
+			Message: "数据共享失败",
+			Data:    err.Error(),
+		}
+	}
+	return StatusOK, &Response{
+		Code:    StatusOK,
+		Message: "ok",
+	}
+}
+
+func (this *FileUC) CancelShare(ctx *gin.Context) (int, *Response) {
+	username := ctx.Query("username")
+	id := ctx.Query("id")
+	if username == "" || id == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	fid, _ := primitive.ObjectIDFromHex(id)
+	if err := fr.CancelShare(username, fid); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseDelete,
+			Message: "取消共享失败",
 			Data:    err.Error(),
 		}
 	}

@@ -11,18 +11,8 @@ func InitRouter() *gin.Engine {
 	router := gin.Default()
 	//开启允许跨域
 	router.Use(middleware.CORS())
-	//加载用户相关路由
-	user(router)
-	admin(router)
-	//加载文件操作相关路由
-	file(router)
 
-	return router
-}
-
-// user 用户相关路由
-func user(router *gin.Engine) {
-	//用户通用路由
+	//通用路由
 	var general = router.Group("/api/general")
 	{
 		//用户注册功能
@@ -35,7 +25,23 @@ func user(router *gin.Engine) {
 		general.POST("/reset", handler.Reset)
 		//验证码检测过期
 		general.GET("/reset/check", handler.CheckUUID)
+		//某共享列表 otth[on the third hand]:第三方的
+		general.GET("/share", handler.OTTHShareList)
+		//管理员登录认证
+		general.POST("/admin", handler.AuthAdminToken)
 	}
+
+	//加载用户相关路由
+	user(router)
+	admin(router)
+	//加载文件操作相关路由
+	file(router)
+
+	return router
+}
+
+// user 用户相关路由
+func user(router *gin.Engine) {
 	//用户路由 这部分路由需要JWT认证 使用JWT中间件
 	var user = router.Group("/api/user", middleware.JWTAuth())
 	{
@@ -53,10 +59,22 @@ func user(router *gin.Engine) {
 }
 func admin(router *gin.Engine) {
 	//管理员路由
-	var admin = router.Group("/api/admin")
+	var admin = router.Group("/api/admin", middleware.AdminTokenAuth())
 	{
 		//用户列表
-		admin.GET("/user", handler.FindMany)
+		admin.GET("/user/list", handler.FindMany)
+		//用户数量统计
+		admin.GET("/user/count", handler.Census)
+		//用户禁用
+		admin.GET("/user/disabled", handler.DisabledUser)
+		//添加组
+		admin.POST("/group/add", handler.AddGroup)
+		//删除组
+		admin.GET("/group/delete", handler.DeleteGroup)
+		//修改组
+		admin.POST("/group/update", handler.UpdateGroup)
+		//组列表
+		admin.GET("/group/list", handler.GroupList)
 	}
 }
 
@@ -78,11 +96,24 @@ func file(router *gin.Engine) {
 		file.GET("/rename", handler.RenameFile)
 		//共享文件
 		file.GET("/share", handler.ShareFile)
+		//取消共享
+		file.GET("/share/cancel", handler.CancelShare)
+		//共享列表
+		file.GET("/share/list", handler.ShareList)
 		//查看当前文件夹文件列表
 		file.GET("/list", handler.ListDir)
 		//查看根目录文件列表
 		file.GET("/root", handler.ListRoot)
 		//查看文件信息
 		file.GET("/info", handler.FileInfo)
+	}
+}
+
+// secure 安全相关路由 暂时先不设置 jwt认证
+func secure(router *gin.Engine) {
+	var secure = router.Group("/api/secure")
+	{
+		secure.GET("/get", handler.GetSecretToken)
+		secure.GET("/parse", handler.ParseSecretToken)
 	}
 }

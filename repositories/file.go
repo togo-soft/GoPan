@@ -24,7 +24,7 @@ func (this *FileRepo) UploadFile(username string, file *models.File) error {
 	return nil
 }
 
-func (this *FileRepo) CreateDir(username,dirname string,file *models.File) error {
+func (this *FileRepo) CreateDir(username, dirname string, file *models.File) error {
 	collection := mgo.Database("file").Collection(username)
 	if _, err := collection.InsertOne(ctx, file); err != nil {
 		return err
@@ -52,10 +52,39 @@ func (this *FileRepo) RenameFile(username, filename string, id primitive.ObjectI
 	return nil
 }
 
-func (this *FileRepo) ShareFile(username string, id primitive.ObjectID) error {
+func (this *FileRepo) OTTHShareFile(username string, id primitive.ObjectID) ([]models.File, error) {
+	collection := mgo.Database("file").Collection(username)
+	var opts = options.Find().SetSort(bson.D{{"isdir", -1}})
+	res, _ := collection.Find(ctx, bson.D{{"pid", id}}, opts)
+	var result []models.File
+	err := res.All(ctx, &result)
+	return result, err
+}
+
+func (this *FileRepo) ShareList(username string) ([]models.File, error) {
+	collection := mgo.Database("file").Collection(username)
+	//排序规则
+	var opts = options.Find().SetSort(bson.D{{"isdir", -1}})
+	res, _ := collection.Find(ctx, bson.D{{"isshare", true}}, opts)
+	var result []models.File
+	err := res.All(ctx, &result)
+	return result, err
+}
+
+func (this *FileRepo) ShareFile(username string, id primitive.ObjectID, fsk string) error {
 	collection := mgo.Database("file").Collection(username)
 	filter := bson.D{{"id", id}}
-	update := bson.D{{"$set", bson.D{{"isshare", true}}}}
+	update := bson.D{{"$set", bson.D{{"isshare", true}, {"fsk", fsk}}}}
+	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *FileRepo) CancelShare(username string, id primitive.ObjectID) error {
+	collection := mgo.Database("file").Collection(username)
+	filter := bson.D{{"id", id}}
+	update := bson.D{{"$set", bson.D{{"isshare", false}}}}
 	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
 		return err
 	}
@@ -69,8 +98,8 @@ func (this *FileRepo) DeleteDir(username string, id primitive.ObjectID) error {
 func (this *FileRepo) ListDir(username string, pid primitive.ObjectID) ([]models.File, error) {
 	collection := mgo.Database("file").Collection(username)
 	//排序规则
-	var opts = options.Find().SetSort(bson.D{{"isdir",-1}})
-	res, _ := collection.Find(ctx, bson.D{{"pid", pid}},opts)
+	var opts = options.Find().SetSort(bson.D{{"isdir", -1}})
+	res, _ := collection.Find(ctx, bson.D{{"pid", pid}}, opts)
 	var result []models.File
 	err := res.All(ctx, &result)
 	return result, err
@@ -84,8 +113,8 @@ func (this *FileRepo) ListRoot(username string) ([]models.File, primitive.Object
 	}
 	// 获取子结构信息
 	//排序规则
-	var opts = options.Find().SetSort(bson.D{{"isdir",-1}})
-	res, _ := collection.Find(ctx, bson.D{{"pid", root.Id}},opts)
+	var opts = options.Find().SetSort(bson.D{{"isdir", -1}})
+	res, _ := collection.Find(ctx, bson.D{{"pid", root.Id}}, opts)
 	var result []models.File
 	err := res.All(ctx, &result)
 	return result, root.Id, err

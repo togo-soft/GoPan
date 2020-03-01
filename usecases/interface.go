@@ -30,7 +30,25 @@ type UserInterface interface {
 	//查询单一用户接口
 	FindOne(ctx *gin.Context) (int, *Response)
 	//查询用户列表接口
-	FindMany(ctx *gin.Context) *List
+	FindMany(ctx *gin.Context) (int, *List)
+	//用户数量统计
+	Census(ctx *gin.Context) (int, *Response)
+	//管理员登录认证
+	AuthAdminToken(ctx *gin.Context) (int, *Response)
+	//用户禁用
+	DisabledUser(ctx *gin.Context) (int, *Response)
+}
+
+// GroupInterface 组接口
+type GroupInterface interface {
+	//添加组
+	AddGroup(ctx *gin.Context) (int, *Response)
+	//修改组
+	UpdateGroup(ctx *gin.Context) (int, *Response)
+	//删除组
+	DeleteGroup(ctx *gin.Context) (int, *Response)
+	//罗列组
+	GroupList(ctx *gin.Context) (int, *List)
 }
 
 // FileInterface 是文件模块的接口
@@ -38,7 +56,7 @@ type FileInterface interface {
 	//上传文件
 	UploadFile(ctx *gin.Context) (int, *Response)
 	//新建文件夹
-	CreateDir(ctx *gin.Context) (int,*Response)
+	CreateDir(ctx *gin.Context) (int, *Response)
 	//下载文件
 	DownloadFile(ctx *gin.Context) (int, *Response)
 	//删除文件
@@ -47,12 +65,26 @@ type FileInterface interface {
 	DeleteDir(ctx *gin.Context) (int, *Response)
 	//修改文件名称
 	RenameFile(ctx *gin.Context) (int, *Response)
+	//共享列表
+	ShareList(ctx *gin.Context) (int, *List)
+	//第三方查看列表
+	OTTHShareFile(ctx *gin.Context) (int, *List)
 	//共享文件
 	ShareFile(ctx *gin.Context) (int, *Response)
+	//取消共享文件
+	CancelShare(ctx *gin.Context) (int, *Response)
 	//查找当前目录所有文件
 	ListDir(ctx *gin.Context) (int, *List)
 	//查看根目录
 	ListRoot(ctx *gin.Context) (int, *List)
 	//查看某个文件的信息
 	FileInfo(ctx *gin.Context) (int, *Response)
+}
+
+// SecureInterface 安全相关接口
+type SecureInterface interface {
+	//获取安全token
+	GetToken(ctx *gin.Context) (int, *Response)
+	//验证安全token
+	ParseToken(ctx *gin.Context) (int, *Response)
 }

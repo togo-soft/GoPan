@@ -15,6 +15,7 @@ type File struct {
 	FilePath   string             `json:"filepath"` //文件路径
 	IsDir      bool               `json:"isDir"`    //是否是文件夹
 	IsShare    bool               `json:"isShare"`  //是否共享
+	FSK        string             `json:"fsk"`      //共享后的可供访问的key
 	Privacy    bool               `json:"privacy"`  //是否是一个私有文件 单独加密存储
 }
 
@@ -31,4 +32,13 @@ type FileRecv struct {
 
 // FileStorage 用户存储统计
 type FileStorage struct {
+	Username  string `json:"username"`   //用户
+	UsedSize  string `json:"used_size"`  //已使用空间大小
+	TotalSize string `json:"total_size"` //总空间大小
+}
+
+// FileShareKey 用于文件共享是 生成共享key
+type FileShareKey struct {
+	Username string //用户名
+	Id       string //文件ID
 }
