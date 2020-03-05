@@ -77,6 +77,8 @@ type FileInterface interface {
 	ListDir(ctx *gin.Context) (int, *List)
 	//查看根目录
 	ListRoot(ctx *gin.Context) (int, *List)
+	//查看加密目录文件信息
+	ListSecret(ctx *gin.Context) (int, *List)
 	//查看某个文件的信息
 	FileInfo(ctx *gin.Context) (int, *Response)
 }

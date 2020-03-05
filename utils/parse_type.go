@@ -41,3 +41,13 @@ func ParseStringToInt64(s string) int64 {
 	}
 	return _t
 }
+
+// ParseStringToFloat64 将 string 转 float64
+func ParseStringToFloat64(s string) float64 {
+	res, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		log.Fatal("parse string to int64 error:", err)
+		return 0
+	}
+	return res
+}

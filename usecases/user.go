@@ -59,13 +59,19 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 		h := sha256.New()
 		h.Write([]byte(user.Password))
 		user.Password = hex.EncodeToString(h.Sum(nil))
-		//设置fk 文件加密解密密钥
+		//设置fk 文件加密解密密钥 用户名+密码
 		conf := utils.GetConfig()
-		user.Fk = utils.Byte2Base64(utils.PBKDF2Key([]byte(user.Password), []byte(conf.File.Salt), 1024, 32, func() hash.Hash {
+		user.Fk = utils.Byte2Base64(utils.PBKDF2Key([]byte(user.Username+user.Password), []byte(conf.File.Salt), 1024, 32, func() hash.Hash {
 			return sha256.New()
-		}))
-		//设置ak 文件操作认证码 结构为: base64(username+salt)
-		user.Ak = utils.String2Base64(user.Username + conf.User.Salt)
+		}))[:32]
+		//设置IV向量 用户名+盐
+		user.Iv = utils.Byte2Base64(utils.PBKDF2Key([]byte(user.Username+conf.File.Salt), []byte(conf.File.Salt), 1024, 32, func() hash.Hash {
+			return sha256.New()
+		}))[:32]
+		//设置ak 文件操作认证码 用户名
+		user.Ak = utils.Byte2Base64(utils.PBKDF2Key([]byte(user.Username), []byte(conf.File.Salt), 1024, 32, func() hash.Hash {
+			return sha256.New()
+		}))[:16]
 		//账户状态
 		user.Status = true
 	}
@@ -77,6 +83,8 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 			Data:    err,
 		}
 	}
+	//初始化统计条目
+
 	//插入数据库
 	if id, err := ur.Insert(user); err != nil {
 		//插入数据库失败

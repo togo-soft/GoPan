@@ -31,6 +31,7 @@ func (this *FileUC) UploadFile(ctx *gin.Context) (int, *Response) {
 		return StatusClientError, &Response{
 			Code:    ErrorParameterParse,
 			Message: "解析参数错误",
+			Data:    err.Error(),
 		}
 	}
 	//开始逻辑
@@ -49,6 +50,10 @@ func (this *FileUC) UploadFile(ctx *gin.Context) (int, *Response) {
 		f.HashCode = frec.HashCode
 		//设定文件在集群中的存储路径
 		f.FilePath = frec.FilePath
+		//设置 MIME
+		if frec.Mime != "" {
+			f.Mime = frec.Mime
+		}
 	}
 	//写入数据库
 	if err := fr.UploadFile(username, f); err != nil {
@@ -313,6 +318,30 @@ func (this *FileUC) ListRoot(ctx *gin.Context) (int, *List) {
 		return StatusServerError, &List{
 			Code:    ErrorDatabaseDelete,
 			Message: "获取ROOT数据失败",
+			Data:    err.Error(),
+		}
+	} else {
+		return StatusOK, &List{
+			Code:    StatusOK,
+			Message: id,
+			Data:    list,
+			Count:   len(list),
+		}
+	}
+}
+
+func (this *FileUC) ListSecret(ctx *gin.Context) (int, *List) {
+	username := ctx.Query("username")
+	if username == "" {
+		return StatusClientError, &List{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	if list, id, err := fr.ListSecret(username); err != nil {
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseDelete,
+			Message: "获取Secret文件夹数据失败",
 			Data:    err.Error(),
 		}
 	} else {

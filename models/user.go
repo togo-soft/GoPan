@@ -8,8 +8,9 @@ type User struct {
 	Username   string    `form:"username" json:"username" xorm:"varchar(32) notnull unique"` //用户名
 	Nickname   string    `form:"nickname" json:"nickname" xorm:"varchar(32) notnull"`        //昵称
 	Password   string    `form:"password" json:"-" xorm:"varchar(64) notnull"`               //密码
-	Fk         string    `form:"-" json:"fk" xorm:"varchar(44) notnull"`                     //文件密钥
-	Ak         string    `form:"-" json:"ak" xorm:"varchar(36) notnull"`                     //文件 auth_key 与底部存储有关
+	Fk         string    `form:"-" json:"fk" xorm:"varchar(32) notnull"`                     //文件密钥
+	Iv         string    `form:"-" json:"iv" xorm:"varchar(32) notnull"`                     //文件密钥对应的IV向量
+	Ak         string    `form:"-" json:"ak" xorm:"varchar(16) notnull"`                     //文件 auth_key 与底部存储有关
 	Email      string    `form:"email" json:"email" xorm:"varchar(128) notnull unique"`      //邮箱
 	Phone      string    `form:"phone" json:"phone" xorm:"varchar(11)"`                      //电话号码
 	CreateTime time.Time `form:"-" json:"create_time" xorm:"created"`                        //注册时间
@@ -18,10 +19,12 @@ type User struct {
 }
 
 // Group 用户组结构
-type Group struct {
-	Id   int64  `form:"-" json:"id" xorm:"pk autoincr"`
-	Name string `form:"group_name" json:"group_name" xorm:"varchar(32) notnull"`
-	Role string `form:"role" json:"role" xorm:"varchar(32) notnull"`
+type UserGroup struct {
+	Id      int64  `form:"id" json:"id" xorm:"pk autoincr"`                    //组ID
+	Name    string `form:"name" json:"name" xorm:"varchar(32) notnull"`        //组名称
+	Rule    string `form:"rule" json:"rule" xorm:"varchar(16) notnull"`        //组规则
+	Effect  string `form:"effect" json:"effect" xorm:"varchar(16) notnull"`    //rule对应的效果 标注rule的信息
+	Explain string `form:"explain" json:"explain" xorm:"varchar(128) notnull"` //组说明
 }
 
 // UserLog 用户行为日志记录

@@ -57,6 +57,8 @@ func user(router *gin.Engine) {
 		user.POST("/update", handler.ModifyInformation)
 	}
 }
+
+// admin 管理员后台相关路由
 func admin(router *gin.Engine) {
 	//管理员路由
 	var admin = router.Group("/api/admin", middleware.AdminTokenAuth())
@@ -84,6 +86,8 @@ func file(router *gin.Engine) {
 	{
 		//上传文件
 		file.POST("/upload", handler.UploadFile)
+		//私密文件列表
+		file.GET("/secret/list", handler.SecretList)
 		// 新建文件夹
 		file.GET("/createdir", handler.CreateDir)
 		//下载文件

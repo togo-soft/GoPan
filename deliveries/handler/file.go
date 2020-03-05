@@ -52,7 +52,7 @@ func ShareFile(this *gin.Context) {
 	this.JSON(fuc.ShareFile(this))
 }
 
-//取消共享
+// CancelShare 取消共享
 func CancelShare(this *gin.Context) {
 	this.JSON(fuc.CancelShare(this))
 }
@@ -70,4 +70,9 @@ func ListRoot(this *gin.Context) {
 // FileInfo 查看文件信息
 func FileInfo(this *gin.Context) {
 	this.JSON(fuc.FileInfo(this))
+}
+
+// SecretList 私密文件列表
+func SecretList(this *gin.Context) {
+	this.JSON(fuc.ListSecret(this))
 }

@@ -40,13 +40,13 @@ type UserRepoInterface interface {
 
 type GroupRepoInterface interface {
 	//添加组
-	AddGroup(*models.Group) (int64, error)
+	AddGroup(*models.UserGroup) (int64, error)
 	//修改组
-	UpdateGroup(*models.Group) (int64, error)
+	UpdateGroup(*models.UserGroup) (int64, error)
 	//删除组
 	DeleteGroup(int64) (int64, error)
 	//罗列组
-	GroupList() ([]*models.Group, error)
+	GroupList() ([]*models.UserGroup, error)
 }
 
 // FileRepoInterface 文件操作接口
@@ -75,6 +75,8 @@ type FileRepoInterface interface {
 	ListDir(username string, pid primitive.ObjectID) ([]models.File, error)
 	//查看根目录数据
 	ListRoot(username string) ([]models.File, primitive.ObjectID, error)
+	//查看加密目录文件信息
+	ListSecret(username string) ([]models.File, primitive.ObjectID, error)
 	//查看某个文件的信息
 	FileInfo(username string, id primitive.ObjectID) (*models.File, error)
 }

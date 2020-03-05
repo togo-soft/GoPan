@@ -54,7 +54,7 @@ func InitMySQL() error {
 		return err
 	}
 	//同步数据库结构
-	if err = engine.Sync2(new(models.User)); err != nil {
+	if err = engine.Sync2(new(models.User), new(models.UserGroup)); err != nil {
 		return err
 	}
 	//用于设置最大打开的连接数，默认值为0表示不限制

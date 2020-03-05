@@ -20,7 +20,7 @@ func NewGroupUC() GroupInterface {
 }
 
 func (this *GroupUC) AddGroup(ctx *gin.Context) (int, *Response) {
-	var group = new(models.Group)
+	var group = new(models.UserGroup)
 	//检测注册信息是否解析完成
 	if err := ctx.Bind(group); err != nil {
 		return StatusClientError, &Response{
@@ -29,7 +29,7 @@ func (this *GroupUC) AddGroup(ctx *gin.Context) (int, *Response) {
 		}
 	}
 	//判断数据是否完整
-	if group.Name == "" || group.Role == "" {
+	if group.Name == "" || group.Rule == "" {
 		return StatusClientError, &Response{
 			Code:    ErrorParameterDefect,
 			Message: "参数缺失",
@@ -54,13 +54,14 @@ func (this *GroupUC) AddGroup(ctx *gin.Context) (int, *Response) {
 }
 
 func (this *GroupUC) UpdateGroup(ctx *gin.Context) (int, *Response) {
-	var group = &models.Group{}
+	var group = &models.UserGroup{}
 	err := ctx.Bind(group)
 	//检测参数是否正常
 	if err != nil || group.Id == 0 {
 		return StatusClientError, &Response{
 			Code:    ErrorParameterParse,
 			Message: "解析参数错误",
+			Data:    err,
 		}
 	}
 	if id, err := gr.UpdateGroup(group); err != nil {

@@ -17,6 +17,7 @@ type File struct {
 	IsShare    bool               `json:"isShare"`  //是否共享
 	FSK        string             `json:"fsk"`      //共享后的可供访问的key
 	Privacy    bool               `json:"privacy"`  //是否是一个私有文件 单独加密存储
+	Mime       string             `json:"mime"`
 }
 
 // FileRecv 接收前端file数据的结构体
@@ -28,13 +29,14 @@ type FileRecv struct {
 	Uptime   int64  `form:"uptime"`   //存储端返回的上传时间戳
 	HashCode string `form:"hashcode"` //哈希值
 	FilePath string `form:"filepath"` //文件路径
+	Mime     string `form:"mime"`     //文件类型
 }
 
 // FileStorage 用户存储统计
 type FileStorage struct {
 	Username  string `json:"username"`   //用户
-	UsedSize  string `json:"used_size"`  //已使用空间大小
-	TotalSize string `json:"total_size"` //总空间大小
+	UsedSize  string `json:"used_size"`  //已使用空间大小 单位MB
+	TotalSize string `json:"total_size"` //总空间大小 单位MB
 }
 
 // FileShareKey 用于文件共享是 生成共享key
