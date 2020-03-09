@@ -110,6 +110,8 @@ func file(router *gin.Engine) {
 		file.GET("/root", handler.ListRoot)
 		//查看文件信息
 		file.GET("/info", handler.FileInfo)
+		//查看文件系统使用情况
+		file.GET("/ratio", handler.FileSystemUsageRate)
 	}
 }
 

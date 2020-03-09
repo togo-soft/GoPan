@@ -79,4 +79,6 @@ type FileRepoInterface interface {
 	ListSecret(username string) ([]models.File, primitive.ObjectID, error)
 	//查看某个文件的信息
 	FileInfo(username string, id primitive.ObjectID) (*models.File, error)
+	//返回用户使用磁盘比率
+	UsageRate(username string) (*models.FileStorage, error)
 }

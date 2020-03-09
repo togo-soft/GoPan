@@ -2,12 +2,13 @@ package usecases
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"math"
 	"server/models"
 	"server/repositories"
 	"server/utils"
+	"strconv"
 )
 
 // fr 文件仓库操作句柄
@@ -42,8 +43,8 @@ func (this *FileUC) UploadFile(ctx *gin.Context) (int, *Response) {
 		f.Id = primitive.NewObjectID()
 		//设定文件名
 		f.FileName = frec.FileName
-		//设定上传文件的大小
-		f.Size = int64(math.Ceil(float64(frec.Size) / 1024))
+		//设定上传文件的大小 单位MB
+		f.Size,_ = strconv.ParseFloat(fmt.Sprintf("%.2f", frec.Size / 1024 / 1024),64)
 		//设定文件上传时间
 		f.UploadTime = utils.Unix2DateTime(frec.Uptime)
 		//设定哈希值 [重要]
@@ -375,6 +376,29 @@ func (this *FileUC) FileInfo(ctx *gin.Context) (int, *Response) {
 			Code:    StatusOK,
 			Message: "ok",
 			Data:    file,
+		}
+	}
+}
+
+func (this *FileUC) UsageRate(ctx *gin.Context) (int, *Response) {
+	username := ctx.Query("username")
+	if username == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	if fs, err := fr.UsageRate(username); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseDelete,
+			Message: "查找数据失败",
+			Data:    err.Error(),
+		}
+	} else {
+		return StatusOK, &Response{
+			Code:    StatusOK,
+			Message: "ok",
+			Data:    fs,
 		}
 	}
 }

@@ -75,7 +75,7 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 		//账户状态
 		user.Status = true
 	}
-	//初始化虚拟文件系统
+	//初始化虚拟文件系统 [公共文件夹 私密文件夹 文件使用统计]
 	if err := ur.InitFS(user.Username); err != nil {
 		return StatusServerError, &Response{
 			Code:    ErrorDatabaseInsert,
@@ -83,7 +83,6 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 			Data:    err,
 		}
 	}
-	//初始化统计条目
 
 	//插入数据库
 	if id, err := ur.Insert(user); err != nil {

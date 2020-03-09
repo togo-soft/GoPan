@@ -81,6 +81,8 @@ type FileInterface interface {
 	ListSecret(ctx *gin.Context) (int, *List)
 	//查看某个文件的信息
 	FileInfo(ctx *gin.Context) (int, *Response)
+	//用户使用比率
+	UsageRate(ctx *gin.Context) (int, *Response)
 }
 
 // SecureInterface 安全相关接口

@@ -76,3 +76,8 @@ func FileInfo(this *gin.Context) {
 func SecretList(this *gin.Context) {
 	this.JSON(fuc.ListSecret(this))
 }
+
+// FileSystemUsageRate 文件系统使用率
+func FileSystemUsageRate(this *gin.Context) {
+	this.JSON(fuc.UsageRate(this))
+}

@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"server/models"
-	"server/utils"
 )
 
 // FileRepo 文件操作仓库实体 实现了 FileRepoInterface 接口
@@ -20,7 +19,19 @@ func NewFileRepo() FileRepoInterface {
 
 func (this *FileRepo) UploadFile(username string, file *models.File) error {
 	collection := mgo.Database("file").Collection(username)
+	//插入记录
 	if _, err := collection.InsertOne(ctx, file); err != nil {
+		return err
+	}
+	//修改存储占用率
+	var sto = new(models.FileStorage)
+	err := collection.FindOne(ctx, bson.D{{"username", username}}).Decode(sto)
+	if err != nil {
+		return err
+	}
+	filter := bson.D{{"username", username}}
+	update := bson.D{{"$set", bson.D{{"usedsize", file.Size+sto.UsedSize}}}}
+	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
 		return err
 	}
 	return nil
@@ -40,8 +51,25 @@ func (this *FileRepo) DownloadFile(username string, id primitive.ObjectID) error
 
 func (this *FileRepo) DeleteFile(username string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
-	_, err := collection.DeleteOne(ctx, bson.D{{"id", id}})
-	return err
+	var file = new(models.File)
+	if err := collection.FindOne(ctx, bson.D{{"id", id}}).Decode(file);err != nil {
+		return err
+	}
+	if _, err := collection.DeleteOne(ctx, bson.D{{"id", id}});err != nil {
+		return err
+	}
+	//修改存储占用率
+	var sto = new(models.FileStorage)
+	err := collection.FindOne(ctx, bson.D{{"username", username}}).Decode(sto)
+	if err != nil {
+		return err
+	}
+	filter := bson.D{{"username", username}}
+	update := bson.D{{"$set", bson.D{{"usedsize", sto.UsedSize - file.Size}}}}
+	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (this *FileRepo) RenameFile(username, filename string, id primitive.ObjectID) error {
@@ -162,8 +190,16 @@ func (this *FileRepo) CheckRatio(username string) error {
 		return err
 	}
 	//比较大小 UsedSize TotalSize
-	if utils.ParseStringToFloat64(result.UsedSize) > utils.ParseStringToFloat64(result.TotalSize) {
+	if result.UsedSize > result.TotalSize {
 		return errors.New("空间已满,无法继续上传")
 	}
 	return nil
+}
+
+// UsageRate 返回用户使用磁盘比率
+func (this *FileRepo) UsageRate(username string) (*models.FileStorage, error) {
+	collection := mgo.Database("file").Collection(username)
+	var result = new(models.FileStorage)
+	err := collection.FindOne(ctx, bson.D{{"username", username}}).Decode(result)
+	return result, err
 }

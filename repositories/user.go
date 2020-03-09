@@ -37,20 +37,18 @@ func (this *UserRepo) InitFS(username string) error {
 		IsDir:      true,
 		UploadTime: utils.GetNowDateTime(),
 	}
-	_, err := collection.InsertOne(ctx, s)
-	return err
-}
-
-// InitFileStorage 用户存储统计
-func (this *UserRepo) InitFileStorage(username string) error {
-	collection := mgo.Database("file").Collection(username)
-	f := &models.FileStorage{
-		Username:  username,
-		UsedSize:  "",
-		TotalSize: "512",
+	if _, err := collection.InsertOne(ctx, s); err != nil {
+		return err
 	}
-	_, err := collection.InsertOne(ctx, f)
-	return err
+	// 初始化数据统计 默认空间大小iG
+	sto := &models.FileStorage{
+		Username:  username,
+		TotalSize: 1024,
+	}
+	if _, err := collection.InsertOne(ctx, sto); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Insert 将user信息插入数据库
