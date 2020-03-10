@@ -4,8 +4,12 @@ import (
 	"errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"net/http"
 	"server/models"
+	"server/utils"
 )
 
 // FileRepo 文件操作仓库实体 实现了 FileRepoInterface 接口
@@ -30,7 +34,7 @@ func (this *FileRepo) UploadFile(username string, file *models.File) error {
 		return err
 	}
 	filter := bson.D{{"username", username}}
-	update := bson.D{{"$set", bson.D{{"usedsize", file.Size+sto.UsedSize}}}}
+	update := bson.D{{"$set", bson.D{{"usedsize", file.Size + sto.UsedSize}}}}
 	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
 		return err
 	}
@@ -45,17 +49,13 @@ func (this *FileRepo) CreateDir(username, dirname string, file *models.File) err
 	return nil
 }
 
-func (this *FileRepo) DownloadFile(username string, id primitive.ObjectID) error {
-	panic("implement me")
-}
-
 func (this *FileRepo) DeleteFile(username string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
 	var file = new(models.File)
-	if err := collection.FindOne(ctx, bson.D{{"id", id}}).Decode(file);err != nil {
+	if err := collection.FindOne(ctx, bson.D{{"id", id}}).Decode(file); err != nil {
 		return err
 	}
-	if _, err := collection.DeleteOne(ctx, bson.D{{"id", id}});err != nil {
+	if _, err := collection.DeleteOne(ctx, bson.D{{"id", id}}); err != nil {
 		return err
 	}
 	//修改存储占用率
@@ -121,8 +121,74 @@ func (this *FileRepo) CancelShare(username string, id primitive.ObjectID) error 
 	return nil
 }
 
+func getFileIDList(id primitive.ObjectID, list map[primitive.ObjectID]string, collection *mongo.Collection) map[primitive.ObjectID]string {
+	var opts = options.Find().SetSort(bson.D{{"isdir", 1}})
+	res, _ := collection.Find(ctx, bson.D{{"pid", id}}, opts)
+	var result []models.File
+	_ = res.All(ctx, &result)
+	if len(result) == 0 {
+		//空目录 返回即可
+		return nil
+	}
+	for _, v := range result {
+		list[v.Id] = v.HashCode
+		if v.IsDir {
+			//文件夹 执行子集查询
+			getFileIDList(v.Id, list, collection)
+		}
+	}
+	return list
+}
+
+func deleteFileFromDFS(list map[primitive.ObjectID]string) {
+	server := utils.GetConfig().File.DFS
+	for _, value := range list {
+		if value != "" {
+			//只删除文件
+			log.Println(server + "/delete?md5=" + value)
+			_, _ = http.Get(server + "/delete?md5=" + value)
+		}
+	}
+}
+
+func deleteFileFromMongoDB(username string, list map[primitive.ObjectID]string, collection *mongo.Collection) error {
+	var usedSize float64
+	var file = new(models.File)
+	for key, _ := range list {
+		//查询信息
+		if err := collection.FindOne(ctx, bson.D{{"id", key}}).Decode(file); err != nil {
+			return err
+		}
+		//统计此次删除恢复的空间大小
+		usedSize += file.Size
+		//删除文件
+		if _, err := collection.DeleteOne(ctx, bson.D{{"id", key}}); err != nil {
+			return err
+		}
+	}
+	//修改存储占用率
+	var sto = new(models.FileStorage)
+	if err := collection.FindOne(ctx, bson.D{{"username", username}}).Decode(sto); err != nil {
+		return err
+	}
+	filter := bson.D{{"username", username}}
+	update := bson.D{{"$set", bson.D{{"usedsize", sto.UsedSize - usedSize}}}}
+	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (this *FileRepo) DeleteDir(username string, id primitive.ObjectID) error {
-	panic("implement me")
+	collection := mgo.Database("file").Collection(username)
+	//将要删除的目标节点ID放入map中
+	list := make(map[primitive.ObjectID]string)
+	list[id] = ""
+	//递归将下一级ID也放入map
+	log.Println(getFileIDList(id, list, collection))
+	//执行删除操作
+	deleteFileFromDFS(list)
+	return deleteFileFromMongoDB(username, list, collection)
 }
 
 func (this *FileRepo) ListDir(username string, pid primitive.ObjectID) ([]models.File, error) {
@@ -169,6 +235,13 @@ func (this *FileRepo) FileInfo(username string, id primitive.ObjectID) (*models.
 	collection := mgo.Database("file").Collection(username)
 	var result = new(models.File)
 	err := collection.FindOne(ctx, bson.D{{"id", id}}).Decode(result)
+	return result, err
+}
+
+func (this *FileRepo) ShareFileInfo(username string, fsk string) (*models.File, error) {
+	collection := mgo.Database("file").Collection(username)
+	var result = new(models.File)
+	err := collection.FindOne(ctx, bson.D{{"fsk", fsk}}).Decode(result)
 	return result, err
 }
 

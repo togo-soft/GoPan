@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -9,6 +8,7 @@ import (
 	"server/repositories"
 	"server/utils"
 	"strconv"
+	"strings"
 )
 
 // fr 文件仓库操作句柄
@@ -44,7 +44,7 @@ func (this *FileUC) UploadFile(ctx *gin.Context) (int, *Response) {
 		//设定文件名
 		f.FileName = frec.FileName
 		//设定上传文件的大小 单位MB
-		f.Size,_ = strconv.ParseFloat(fmt.Sprintf("%.2f", frec.Size / 1024 / 1024),64)
+		f.Size, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", frec.Size/1024/1024), 64)
 		//设定文件上传时间
 		f.UploadTime = utils.Unix2DateTime(frec.Uptime)
 		//设定哈希值 [重要]
@@ -55,6 +55,8 @@ func (this *FileUC) UploadFile(ctx *gin.Context) (int, *Response) {
 		if frec.Mime != "" {
 			f.Mime = frec.Mime
 		}
+		//设置fsk fsk = username_base62(unix_stamp)
+		f.FSK = username + "_" + utils.Unix2Base62()
 	}
 	//写入数据库
 	if err := fr.UploadFile(username, f); err != nil {
@@ -90,6 +92,7 @@ func (this *FileUC) CreateDir(ctx *gin.Context) (int, *Response) {
 		IsDir:      true,
 		IsShare:    false,
 		Privacy:    false,
+		FSK:        username + "_" + utils.Unix2Base62(),
 	}
 	if err := fr.CreateDir(username, dirname, file); err != nil {
 		return StatusServerError, &Response{
@@ -102,10 +105,6 @@ func (this *FileUC) CreateDir(ctx *gin.Context) (int, *Response) {
 		Code:    StatusOK,
 		Message: "ok",
 	}
-}
-
-func (this *FileUC) DownloadFile(ctx *gin.Context) (int, *Response) {
-	panic("implement me")
 }
 
 func (this *FileUC) DeleteFile(ctx *gin.Context) (int, *Response) {
@@ -132,7 +131,26 @@ func (this *FileUC) DeleteFile(ctx *gin.Context) (int, *Response) {
 }
 
 func (this *FileUC) DeleteDir(ctx *gin.Context) (int, *Response) {
-	panic("implement me")
+	username := ctx.Query("username")
+	id := ctx.Query("id")
+	if username == "" || id == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	fid, _ := primitive.ObjectIDFromHex(id)
+	if err := fr.DeleteDir(username, fid); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseDelete,
+			Message: "删除数据失败",
+			Data:    err.Error(),
+		}
+	}
+	return StatusOK, &Response{
+		Code:    StatusOK,
+		Message: "ok",
+	}
 }
 
 func (this *FileUC) RenameFile(ctx *gin.Context) (int, *Response) {
@@ -191,12 +209,12 @@ func (this *FileUC) OTTHShareFile(ctx *gin.Context) (int, *List) {
 			Message: "参数缺失",
 		}
 	}
-	//解析key
-	var fsk = &models.FileShareKey{}
-	_ = json.Unmarshal([]byte(utils.Base64toString(key)), fsk)
-	id, _ := primitive.ObjectIDFromHex(fsk.Id)
+	//解析key=> fsk=> 截取 username_base62
+	//args[0] 为用户名 args[1] 为unix的base62编码
+	var args = strings.Split(key, "_")
+	username := args[0]
 	//先获取文件信息
-	f, err := fr.FileInfo(fsk.Username, id)
+	f, err := fr.ShareFileInfo(username, key)
 	if err != nil {
 		return StatusServerError, &List{
 			Code:    ErrorDatabaseDelete,
@@ -214,7 +232,7 @@ func (this *FileUC) OTTHShareFile(ctx *gin.Context) (int, *List) {
 		}
 	}
 	//是目录 返回该目录信息
-	if list, err := fr.OTTHShareFile(fsk.Username, id); err != nil {
+	if list, err := fr.OTTHShareFile(username, f.Id); err != nil {
 		return StatusServerError, &List{
 			Code:    ErrorDatabaseDelete,
 			Message: "获取共享列表失败",
@@ -240,11 +258,7 @@ func (this *FileUC) ShareFile(ctx *gin.Context) (int, *Response) {
 		}
 	}
 	fid, _ := primitive.ObjectIDFromHex(id)
-	fsks, _ := json.Marshal(models.FileShareKey{
-		Username: username,
-		Id:       id,
-	})
-	fsk := utils.String2Base64(string(fsks))
+	fsk := username + "_" + utils.Unix2Base62()
 	if err := fr.ShareFile(username, fid, fsk); err != nil {
 		return StatusServerError, &Response{
 			Code:    ErrorDatabaseDelete,

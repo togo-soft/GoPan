@@ -57,8 +57,6 @@ type FileInterface interface {
 	UploadFile(ctx *gin.Context) (int, *Response)
 	//新建文件夹
 	CreateDir(ctx *gin.Context) (int, *Response)
-	//下载文件
-	DownloadFile(ctx *gin.Context) (int, *Response)
 	//删除文件
 	DeleteFile(ctx *gin.Context) (int, *Response)
 	//删除文件夹

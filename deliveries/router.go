@@ -90,12 +90,10 @@ func file(router *gin.Engine) {
 		file.GET("/secret/list", handler.SecretList)
 		// 新建文件夹
 		file.GET("/createdir", handler.CreateDir)
-		//下载文件
-		file.GET("/download", handler.DownloadFile)
 		//删除文件
 		file.GET("/delete", handler.DeleteFile)
 		// 删除文件夹
-		file.GET("/deldir", handler.DeleteDir)
+		file.GET("/delete/dir", handler.DeleteDir)
 		//重命名文件
 		file.GET("/rename", handler.RenameFile)
 		//共享文件

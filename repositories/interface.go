@@ -55,8 +55,6 @@ type FileRepoInterface interface {
 	UploadFile(username string, file *models.File) error
 	//新建文件夹
 	CreateDir(username, dirname string, file *models.File) error
-	//下载文件
-	DownloadFile(username string, id primitive.ObjectID) error
 	//删除文件
 	DeleteFile(username string, id primitive.ObjectID) error
 	//删除文件夹
@@ -68,7 +66,7 @@ type FileRepoInterface interface {
 	//第三方查看共享文件信息
 	OTTHShareFile(username string, pid primitive.ObjectID) ([]models.File, error)
 	//共享文件
-	ShareFile(username string, id primitive.ObjectID, fks string) error
+	ShareFile(username string, id primitive.ObjectID, fsk string) error
 	//取消共享文件
 	CancelShare(username string, id primitive.ObjectID) error
 	//查看文件夹数据
@@ -79,6 +77,8 @@ type FileRepoInterface interface {
 	ListSecret(username string) ([]models.File, primitive.ObjectID, error)
 	//查看某个文件的信息
 	FileInfo(username string, id primitive.ObjectID) (*models.File, error)
+	//共享文件的信息
+	ShareFileInfo(username string, fsk string) (*models.File, error)
 	//返回用户使用磁盘比率
 	UsageRate(username string) (*models.FileStorage, error)
 }

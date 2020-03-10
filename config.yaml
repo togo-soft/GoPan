@@ -52,6 +52,8 @@ environments:
     salt: R29QYW4=
     # 密钥轮转次数 文件密钥通过 PBKDF2 将salt hash进行iter次重复计算后返回32位的密钥 iter太大会影响效率
     iter: 1024
+    # 文件系统配置项
+    dfs: http://192.168.3.23:8080/group1
   # 邮件服务功能配置
   email:
     # 邮件发送服务STMP地址 host

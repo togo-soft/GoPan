@@ -53,6 +53,7 @@ type Jwt struct {
 type File struct {
 	Salt string `yaml:"salt"` //盐值
 	Iter int    `yaml:"iter"` //加密轮转次数
+	DFS  string `yaml:"dfs"`  //分布式文件系统地址
 }
 
 // Email 邮件配置相关

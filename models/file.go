@@ -38,9 +38,3 @@ type FileStorage struct {
 	UsedSize  float64 `json:"used_size"`  //已使用空间大小 单位MB
 	TotalSize float64 `json:"total_size"` //总空间大小 单位MB
 }
-
-// FileShareKey 用于文件共享是 生成共享key
-type FileShareKey struct {
-	Username string //用户名
-	Id       string //文件ID
-}

@@ -17,11 +17,6 @@ func CreateDir(this *gin.Context) {
 	this.JSON(fuc.CreateDir(this))
 }
 
-// DownloadFile 下载文件
-func DownloadFile(this *gin.Context) {
-	this.JSON(fuc.DownloadFile(this))
-}
-
 // DeleteFile 删除文件
 func DeleteFile(this *gin.Context) {
 	this.JSON(fuc.DeleteFile(this))
