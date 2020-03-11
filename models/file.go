@@ -38,3 +38,19 @@ type FileStorage struct {
 	UsedSize  float64 `json:"used_size"`  //已使用空间大小 单位MB
 	TotalSize float64 `json:"total_size"` //总空间大小 单位MB
 }
+
+// FileCollection 文件收藏
+type FileCollection struct {
+	Pid            primitive.ObjectID `json:"pid"`      //父级ID
+	Id             primitive.ObjectID `json:"id"`       //ID
+	Filename       string             `json:"filename"` //文件名
+	FSK            string             `json:"fsk"`      //共享文件key
+	CollectionTime string             `json:"ctime"`    //收藏时间
+}
+
+// FileCollectionRecv 接收前端的数据
+type FileCollectionRecv struct {
+	Username string `form:"username"` //用户名称
+	Filename string `form:"filename"` //文件名
+	FSK      string `form:"fsk"`      //共享文件key
+}

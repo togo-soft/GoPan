@@ -77,8 +77,16 @@ type FileRepoInterface interface {
 	ListSecret(username string) ([]models.File, primitive.ObjectID, error)
 	//查看某个文件的信息
 	FileInfo(username string, id primitive.ObjectID) (*models.File, error)
+	//根据文件名查询文件信息
+	FindFileByFilename(username,filename string) (*models.File,error)
 	//共享文件的信息
 	ShareFileInfo(username string, fsk string) (*models.File, error)
 	//返回用户使用磁盘比率
 	UsageRate(username string) (*models.FileStorage, error)
+	//收藏文件列表
+	CollectionList(username string) ([]models.FileCollection, primitive.ObjectID, error)
+	//收藏文件
+	CollectionFile(username string, fc *models.FileCollection) error
+	//取消收藏
+	CancelCollection(username string, id primitive.ObjectID) error
 }

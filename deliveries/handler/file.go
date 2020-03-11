@@ -76,3 +76,18 @@ func SecretList(this *gin.Context) {
 func FileSystemUsageRate(this *gin.Context) {
 	this.JSON(fuc.UsageRate(this))
 }
+
+// CollectionList 文件收藏列表
+func CollectionList(this *gin.Context)  {
+	this.JSON(fuc.CollectionList(this))
+}
+
+// CollectionFile 收藏文件
+func CollectionFile(this *gin.Context)  {
+	this.JSON(fuc.CollectionFile(this))
+}
+
+// CancelCollection 取消收藏
+func CancelCollection(this *gin.Context)  {
+	this.JSON(fuc.CancelCollection(this))
+}

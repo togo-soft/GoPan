@@ -81,6 +81,12 @@ type FileInterface interface {
 	FileInfo(ctx *gin.Context) (int, *Response)
 	//用户使用比率
 	UsageRate(ctx *gin.Context) (int, *Response)
+	//收藏列表
+	CollectionList(ctx *gin.Context) (int, *List)
+	//收藏文件
+	CollectionFile(ctx *gin.Context) (int, *Response)
+	//删除收藏
+	CancelCollection(ctx *gin.Context) (int, *Response)
 }
 
 // SecureInterface 安全相关接口

@@ -4,18 +4,16 @@ import "time"
 
 // User 用户表结构
 type User struct {
-	Id         int64     `form:"id" json:"id"`
-	Username   string    `form:"username" json:"username" xorm:"varchar(32) notnull unique"` //用户名
-	Nickname   string    `form:"nickname" json:"nickname" xorm:"varchar(32) notnull"`        //昵称
-	Password   string    `form:"password" json:"-" xorm:"varchar(64) notnull"`               //密码
-	Fk         string    `form:"-" json:"fk" xorm:"varchar(32) notnull"`                     //文件密钥
-	Iv         string    `form:"-" json:"iv" xorm:"varchar(32) notnull"`                     //文件密钥对应的IV向量
-	Ak         string    `form:"-" json:"ak" xorm:"varchar(16) notnull"`                     //文件 auth_key 与底部存储有关
-	Email      string    `form:"email" json:"email" xorm:"varchar(128) notnull unique"`      //邮箱
-	Phone      string    `form:"phone" json:"phone" xorm:"varchar(11)"`                      //电话号码
-	CreateTime time.Time `form:"-" json:"create_time" xorm:"created"`                        //注册时间
-	Status     bool      `form:"status" json:"status"`                                       //账户状态
-	Statement  string    `form:"statement" json:"statement" xorm:"varchar(255)"`             //个人说明
+	Id         int64  `form:"id" json:"id"`
+	Username   string `form:"username" json:"username" xorm:"varchar(32) notnull unique"` //用户名
+	Password   string `form:"password" json:"-" xorm:"varchar(64) notnull"`               //密码
+	Fk         string `form:"-" json:"fk" xorm:"varchar(32) notnull"`                     //文件密钥
+	Iv         string `form:"-" json:"iv" xorm:"varchar(32) notnull"`                     //文件密钥对应的IV向量
+	Ak         string `form:"-" json:"ak" xorm:"varchar(16) notnull"`                     //文件 auth_key 与底部存储有关
+	Email      string `form:"email" json:"email" xorm:"varchar(128) notnull unique"`      //邮箱
+	Phone      string `form:"phone" json:"phone" xorm:"varchar(11)"`                      //电话号码
+	CreateTime string `form:"-" json:"create_time" xorm:"created"`                        //注册时间
+	Status     bool   `form:"status" json:"status"`                                       //账户状态
 }
 
 // Group 用户组结构

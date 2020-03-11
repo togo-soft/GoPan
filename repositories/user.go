@@ -40,6 +40,16 @@ func (this *UserRepo) InitFS(username string) error {
 	if _, err := collection.InsertOne(ctx, s); err != nil {
 		return err
 	}
+	// 建立收藏目录
+	c := &models.File{
+		Id:         primitive.NewObjectID(),
+		FileName:   "/@",
+		IsDir:      true,
+		UploadTime: utils.GetNowDateTime(),
+	}
+	if _, err := collection.InsertOne(ctx, c); err != nil {
+		return err
+	}
 	// 初始化数据统计 默认空间大小iG
 	sto := &models.FileStorage{
 		Username:  username,

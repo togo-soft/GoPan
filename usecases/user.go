@@ -51,10 +51,6 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 	}
 	//业务逻辑
 	{
-		//昵称为空 使用默认用户名
-		if user.Nickname == "" {
-			user.Nickname = user.Username
-		}
 		//sha256 获得密码摘要
 		h := sha256.New()
 		h.Write([]byte(user.Password))
@@ -74,6 +70,8 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 		}))[:16]
 		//账户状态
 		user.Status = true
+		//注册时间
+		user.CreateTime = utils.GetNowDateTime()
 	}
 	//初始化虚拟文件系统 [公共文件夹 私密文件夹 文件使用统计]
 	if err := ur.InitFS(user.Username); err != nil {

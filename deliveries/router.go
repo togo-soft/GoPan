@@ -110,6 +110,12 @@ func file(router *gin.Engine) {
 		file.GET("/info", handler.FileInfo)
 		//查看文件系统使用情况
 		file.GET("/ratio", handler.FileSystemUsageRate)
+		//收藏文件列表
+		file.GET("/collection/list",handler.CollectionList)
+		//收藏文件
+		file.POST("/collection",handler.CollectionFile)
+		//取消收藏
+		file.GET("/collection/cancel",handler.CancelCollection)
 	}
 }
 

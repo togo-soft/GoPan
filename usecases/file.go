@@ -416,3 +416,92 @@ func (this *FileUC) UsageRate(ctx *gin.Context) (int, *Response) {
 		}
 	}
 }
+
+func (this *FileUC) CollectionList(ctx *gin.Context) (int, *List) {
+	username := ctx.Query("username")
+	if username == "" {
+		return StatusClientError, &List{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	if list,id, err := fr.CollectionList(username); err != nil {
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseDelete,
+			Message: "获取收藏列表失败",
+			Data:    err.Error(),
+		}
+	} else {
+		return StatusOK, &List{
+			Code:    StatusOK,
+			Message: id,
+			Data:    list,
+			Count:   len(list),
+		}
+	}
+}
+
+func (this *FileUC) CancelCollection(ctx *gin.Context) (int, *Response) {
+	username := ctx.Query("username")
+	id := ctx.Query("id")
+	if username == "" || id == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	fid, _ := primitive.ObjectIDFromHex(id)
+	if err := fr.CancelCollection(username, fid); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseDelete,
+			Message: "取消收藏失败",
+			Data:    err.Error(),
+		}
+	}
+	return StatusOK, &Response{
+		Code:    StatusOK,
+		Message: "ok",
+	}
+}
+
+func (this *FileUC) CollectionFile(ctx *gin.Context) (int, *Response) {
+	var fcr = new(models.FileCollectionRecv)
+	if err := ctx.Bind(fcr); err != nil {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "解析参数错误",
+		}
+	}
+	if fcr.Username == "" || fcr.FSK == "" || fcr.Filename == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	//获取收藏目录的ID
+	ff,err := fr.FindFileByFilename(fcr.Username,"/@")
+	if err != nil {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterDefect,
+			Message: "系统错误！请联系管理员排查",
+		}
+	}
+	fc := &models.FileCollection{
+		Pid:            ff.Id,
+		Id:             primitive.NewObjectID(),
+		Filename:       fcr.Filename,
+		FSK:            fcr.FSK,
+		CollectionTime: utils.GetNowDateTime(),
+	}
+	if err := fr.CollectionFile(fcr.Username, fc); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseDelete,
+			Message: "数据收藏失败",
+			Data:    err.Error(),
+		}
+	}
+	return StatusOK, &Response{
+		Code:    StatusOK,
+		Message: "ok",
+	}
+}

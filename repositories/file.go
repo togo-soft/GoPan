@@ -276,3 +276,40 @@ func (this *FileRepo) UsageRate(username string) (*models.FileStorage, error) {
 	err := collection.FindOne(ctx, bson.D{{"username", username}}).Decode(result)
 	return result, err
 }
+
+func (this *FileRepo) CollectionList(username string) ([]models.FileCollection, primitive.ObjectID, error) {
+	collection := mgo.Database("file").Collection(username)
+	var root = new(models.File)
+	if err := collection.FindOne(ctx, bson.D{{"filename", "/@"}}).Decode(root); err != nil {
+		return nil, root.Id, err
+	}
+	// 获取子结构信息
+	var opts = options.Find().SetSort(bson.D{{"collectiontime", -1}})
+	res, _ := collection.Find(ctx, bson.D{{"pid", root.Id}}, opts)
+	var result []models.FileCollection
+	err := res.All(ctx, &result)
+	return result, root.Id, err
+}
+
+func (this *FileRepo) CollectionFile(username string, fc *models.FileCollection) error {
+	collection := mgo.Database("file").Collection(username)
+	if _, err := collection.InsertOne(ctx, fc); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *FileRepo) CancelCollection(username string, id primitive.ObjectID) error {
+	collection := mgo.Database("file").Collection(username)
+	if _, err := collection.DeleteOne(ctx, bson.D{{"id", id}}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (this *FileRepo) FindFileByFilename(username,filename string) (*models.File,error) {
+	collection := mgo.Database("file").Collection(username)
+	var result = new(models.File)
+	err := collection.FindOne(ctx, bson.D{{"filename", filename}}).Decode(result)
+	return result, err
+}
