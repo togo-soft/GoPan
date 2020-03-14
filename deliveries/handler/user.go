@@ -81,3 +81,8 @@ func AuthAdminToken(this *gin.Context) {
 func DisabledUser(this *gin.Context) {
 	this.JSON(uuc.DisabledUser(this))
 }
+
+// UserGroupUpdate 修改用户分组
+func UserGroupUpdate(this *gin.Context)  {
+	this.JSON(uuc.UserGroupUpdate(this))
+}

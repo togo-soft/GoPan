@@ -37,6 +37,8 @@ type UserInterface interface {
 	AuthAdminToken(ctx *gin.Context) (int, *Response)
 	//用户禁用
 	DisabledUser(ctx *gin.Context) (int, *Response)
+	//修改用户的组
+	UserGroupUpdate(ctx *gin.Context) (int, *Response)
 }
 
 // GroupInterface 组接口
@@ -61,6 +63,8 @@ type FileInterface interface {
 	DeleteFile(ctx *gin.Context) (int, *Response)
 	//删除文件夹
 	DeleteDir(ctx *gin.Context) (int, *Response)
+	//移动文件
+	MoveFile(ctx *gin.Context) (int, *Response)
 	//修改文件名称
 	RenameFile(ctx *gin.Context) (int, *Response)
 	//共享列表

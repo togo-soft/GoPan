@@ -59,6 +59,8 @@ type FileRepoInterface interface {
 	DeleteFile(username string, id primitive.ObjectID) error
 	//删除文件夹
 	DeleteDir(username string, id primitive.ObjectID) error
+	//移动文件
+	MoveFile(username string, id, pid primitive.ObjectID) error
 	//修改文件名称
 	RenameFile(username, filename string, id primitive.ObjectID) error
 	//共享列表
@@ -78,7 +80,7 @@ type FileRepoInterface interface {
 	//查看某个文件的信息
 	FileInfo(username string, id primitive.ObjectID) (*models.File, error)
 	//根据文件名查询文件信息
-	FindFileByFilename(username,filename string) (*models.File,error)
+	FindFileByFilename(username, filename string) (*models.File, error)
 	//共享文件的信息
 	ShareFileInfo(username string, fsk string) (*models.File, error)
 	//返回用户使用磁盘比率
@@ -89,4 +91,6 @@ type FileRepoInterface interface {
 	CollectionFile(username string, fc *models.FileCollection) error
 	//取消收藏
 	CancelCollection(username string, id primitive.ObjectID) error
+	//修改用户存储统计总大小
+	UpdateFileStorage(username string, totalSize float64) error
 }

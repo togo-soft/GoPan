@@ -27,6 +27,11 @@ func DeleteDir(this *gin.Context) {
 	this.JSON(fuc.DeleteDir(this))
 }
 
+// MoveFile 删除文件
+func MoveFile(this *gin.Context) {
+	this.JSON(fuc.MoveFile(this))
+}
+
 // RenameFile 重命名文件
 func RenameFile(this *gin.Context) {
 	this.JSON(fuc.RenameFile(this))
@@ -78,16 +83,16 @@ func FileSystemUsageRate(this *gin.Context) {
 }
 
 // CollectionList 文件收藏列表
-func CollectionList(this *gin.Context)  {
+func CollectionList(this *gin.Context) {
 	this.JSON(fuc.CollectionList(this))
 }
 
 // CollectionFile 收藏文件
-func CollectionFile(this *gin.Context)  {
+func CollectionFile(this *gin.Context) {
 	this.JSON(fuc.CollectionFile(this))
 }
 
 // CancelCollection 取消收藏
-func CancelCollection(this *gin.Context)  {
+func CancelCollection(this *gin.Context) {
 	this.JSON(fuc.CancelCollection(this))
 }

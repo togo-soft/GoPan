@@ -70,7 +70,7 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 		}))[:16]
 		//账户状态
 		user.Status = true
-		//注册时间
+		//创建时间
 		user.CreateTime = utils.GetNowDateTime()
 	}
 	//初始化虚拟文件系统 [公共文件夹 私密文件夹 文件使用统计]
@@ -417,5 +417,28 @@ func (this *UserUC) DisabledUser(ctx *gin.Context) (int, *Response) {
 	return StatusOK, &Response{
 		Code:    StatusOK,
 		Message: utils.ParseInt64ToString(id),
+	}
+}
+
+// UserGroupUpdate 修改用户分组
+func (this *UserUC) UserGroupUpdate(ctx *gin.Context) (int, *Response) {
+	username := ctx.Query("username")
+	role := ctx.Query("role")
+	if username == "" || role == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "参数缺失",
+		}
+	}
+	if err := fr.UpdateFileStorage(username,utils.ParseStringToFloat64(role));err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseUpdate,
+			Message: "数据库操作出错",
+			Data:    err,
+		}
+	}
+	return StatusOK, &Response{
+		Code:    StatusOK,
+		Message: "ok",
 	}
 }

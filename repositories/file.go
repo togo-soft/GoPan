@@ -21,6 +21,7 @@ func NewFileRepo() FileRepoInterface {
 	return &FileRepo{}
 }
 
+// UploadFile 上传文件
 func (this *FileRepo) UploadFile(username string, file *models.File) error {
 	collection := mgo.Database("file").Collection(username)
 	//插入记录
@@ -41,6 +42,7 @@ func (this *FileRepo) UploadFile(username string, file *models.File) error {
 	return nil
 }
 
+// CreateDir 创建目录
 func (this *FileRepo) CreateDir(username, dirname string, file *models.File) error {
 	collection := mgo.Database("file").Collection(username)
 	if _, err := collection.InsertOne(ctx, file); err != nil {
@@ -49,6 +51,7 @@ func (this *FileRepo) CreateDir(username, dirname string, file *models.File) err
 	return nil
 }
 
+// DeleteFile 删除文件
 func (this *FileRepo) DeleteFile(username string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
 	var file = new(models.File)
@@ -72,6 +75,18 @@ func (this *FileRepo) DeleteFile(username string, id primitive.ObjectID) error {
 	return nil
 }
 
+// MoveFile 移动文件位置
+func (this *FileRepo) MoveFile(username string, id, pid primitive.ObjectID) error {
+	collection := mgo.Database("file").Collection(username)
+	filter := bson.D{{"id", id}}
+	update := bson.D{{"$set", bson.D{{"pid", pid}}}}
+	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
+		return err
+	}
+	return nil
+}
+
+// RenameFile 文件/目录重命名
 func (this *FileRepo) RenameFile(username, filename string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
 	filter := bson.D{{"id", id}}
@@ -82,6 +97,7 @@ func (this *FileRepo) RenameFile(username, filename string, id primitive.ObjectI
 	return nil
 }
 
+// OTTHShareFile 第三方获取文件共享列表
 func (this *FileRepo) OTTHShareFile(username string, id primitive.ObjectID) ([]models.File, error) {
 	collection := mgo.Database("file").Collection(username)
 	var opts = options.Find().SetSort(bson.D{{"isdir", -1}})
@@ -91,6 +107,7 @@ func (this *FileRepo) OTTHShareFile(username string, id primitive.ObjectID) ([]m
 	return result, err
 }
 
+// ShareList 共享列表
 func (this *FileRepo) ShareList(username string) ([]models.File, error) {
 	collection := mgo.Database("file").Collection(username)
 	//排序规则
@@ -101,6 +118,7 @@ func (this *FileRepo) ShareList(username string) ([]models.File, error) {
 	return result, err
 }
 
+// ShareFile 共享文件
 func (this *FileRepo) ShareFile(username string, id primitive.ObjectID, fsk string) error {
 	collection := mgo.Database("file").Collection(username)
 	filter := bson.D{{"id", id}}
@@ -111,6 +129,7 @@ func (this *FileRepo) ShareFile(username string, id primitive.ObjectID, fsk stri
 	return nil
 }
 
+// CancelShare 取消共享
 func (this *FileRepo) CancelShare(username string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
 	filter := bson.D{{"id", id}}
@@ -121,6 +140,7 @@ func (this *FileRepo) CancelShare(username string, id primitive.ObjectID) error 
 	return nil
 }
 
+// getFileIDList 删除文件操作前 先获取所有子项的ID
 func getFileIDList(id primitive.ObjectID, list map[primitive.ObjectID]string, collection *mongo.Collection) map[primitive.ObjectID]string {
 	var opts = options.Find().SetSort(bson.D{{"isdir", 1}})
 	res, _ := collection.Find(ctx, bson.D{{"pid", id}}, opts)
@@ -140,6 +160,7 @@ func getFileIDList(id primitive.ObjectID, list map[primitive.ObjectID]string, co
 	return list
 }
 
+// deleteFileFromDFS 从DFS删除文件
 func deleteFileFromDFS(list map[primitive.ObjectID]string) {
 	server := utils.GetConfig().File.DFS
 	for _, value := range list {
@@ -151,6 +172,7 @@ func deleteFileFromDFS(list map[primitive.ObjectID]string) {
 	}
 }
 
+// deleteFileFromMongoDB 从mongodb删除文件
 func deleteFileFromMongoDB(username string, list map[primitive.ObjectID]string, collection *mongo.Collection) error {
 	var usedSize float64
 	var file = new(models.File)
@@ -179,6 +201,7 @@ func deleteFileFromMongoDB(username string, list map[primitive.ObjectID]string, 
 	return nil
 }
 
+// DeleteDir 删除文件夹操作
 func (this *FileRepo) DeleteDir(username string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
 	//将要删除的目标节点ID放入map中
@@ -191,6 +214,7 @@ func (this *FileRepo) DeleteDir(username string, id primitive.ObjectID) error {
 	return deleteFileFromMongoDB(username, list, collection)
 }
 
+// ListDir 罗列指定目录的信息
 func (this *FileRepo) ListDir(username string, pid primitive.ObjectID) ([]models.File, error) {
 	collection := mgo.Database("file").Collection(username)
 	//排序规则
@@ -201,6 +225,7 @@ func (this *FileRepo) ListDir(username string, pid primitive.ObjectID) ([]models
 	return result, err
 }
 
+// ListRoot 罗列文件列表
 func (this *FileRepo) ListRoot(username string) ([]models.File, primitive.ObjectID, error) {
 	collection := mgo.Database("file").Collection(username)
 	var root = new(models.File)
@@ -216,6 +241,7 @@ func (this *FileRepo) ListRoot(username string) ([]models.File, primitive.Object
 	return result, root.Id, err
 }
 
+// ListSecret 私密文件列表
 func (this *FileRepo) ListSecret(username string) ([]models.File, primitive.ObjectID, error) {
 	collection := mgo.Database("file").Collection(username)
 	var root = new(models.File)
@@ -231,6 +257,7 @@ func (this *FileRepo) ListSecret(username string) ([]models.File, primitive.Obje
 	return result, root.Id, err
 }
 
+// FileInfo 文件信息
 func (this *FileRepo) FileInfo(username string, id primitive.ObjectID) (*models.File, error) {
 	collection := mgo.Database("file").Collection(username)
 	var result = new(models.File)
@@ -238,6 +265,7 @@ func (this *FileRepo) FileInfo(username string, id primitive.ObjectID) (*models.
 	return result, err
 }
 
+// ShareFileInfo 共享文件信息
 func (this *FileRepo) ShareFileInfo(username string, fsk string) (*models.File, error) {
 	collection := mgo.Database("file").Collection(username)
 	var result = new(models.File)
@@ -246,7 +274,7 @@ func (this *FileRepo) ShareFileInfo(username string, fsk string) (*models.File, 
 }
 
 // UpdateFileStorage 修改用户存储统计总大小
-func (this *FileRepo) UpdateFileStorage(username, totalSize string) error {
+func (this *FileRepo) UpdateFileStorage(username string, totalSize float64) error {
 	collection := mgo.Database("file").Collection(username)
 	filter := bson.D{{"username", username}}
 	update := bson.D{{"$set", bson.D{{"totalsize", totalSize}}}}
@@ -277,6 +305,7 @@ func (this *FileRepo) UsageRate(username string) (*models.FileStorage, error) {
 	return result, err
 }
 
+// CollectionList 收藏文件列表
 func (this *FileRepo) CollectionList(username string) ([]models.FileCollection, primitive.ObjectID, error) {
 	collection := mgo.Database("file").Collection(username)
 	var root = new(models.File)
@@ -291,6 +320,7 @@ func (this *FileRepo) CollectionList(username string) ([]models.FileCollection, 
 	return result, root.Id, err
 }
 
+// CollectionFile 收藏文件
 func (this *FileRepo) CollectionFile(username string, fc *models.FileCollection) error {
 	collection := mgo.Database("file").Collection(username)
 	if _, err := collection.InsertOne(ctx, fc); err != nil {
@@ -299,6 +329,7 @@ func (this *FileRepo) CollectionFile(username string, fc *models.FileCollection)
 	return nil
 }
 
+// CancelCollection 取消收藏文件
 func (this *FileRepo) CancelCollection(username string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
 	if _, err := collection.DeleteOne(ctx, bson.D{{"id", id}}); err != nil {
@@ -307,7 +338,8 @@ func (this *FileRepo) CancelCollection(username string, id primitive.ObjectID) e
 	return nil
 }
 
-func (this *FileRepo) FindFileByFilename(username,filename string) (*models.File,error) {
+// FindFileByFilename 通过文件名 查询文件实体
+func (this *FileRepo) FindFileByFilename(username, filename string) (*models.File, error) {
 	collection := mgo.Database("file").Collection(username)
 	var result = new(models.File)
 	err := collection.FindOne(ctx, bson.D{{"filename", filename}}).Decode(result)

@@ -177,6 +177,31 @@ func (this *FileUC) RenameFile(ctx *gin.Context) (int, *Response) {
 	}
 }
 
+func (this *FileUC) MoveFile(ctx *gin.Context) (int, *Response) {
+	username := ctx.Query("username")
+	id := ctx.Query("id")
+	pid := ctx.Query("pid")
+	if username == "" || id == "" || pid == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	fid, _ := primitive.ObjectIDFromHex(id)
+	fpid, _ := primitive.ObjectIDFromHex(pid)
+	if err := fr.MoveFile(username, fid, fpid); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseDelete,
+			Message: "删除数据失败",
+			Data:    err.Error(),
+		}
+	}
+	return StatusOK, &Response{
+		Code:    StatusOK,
+		Message: "ok",
+	}
+}
+
 func (this *FileUC) ShareList(ctx *gin.Context) (int, *List) {
 	username := ctx.Query("username")
 	if username == "" {
@@ -425,7 +450,7 @@ func (this *FileUC) CollectionList(ctx *gin.Context) (int, *List) {
 			Message: "参数缺失",
 		}
 	}
-	if list,id, err := fr.CollectionList(username); err != nil {
+	if list, id, err := fr.CollectionList(username); err != nil {
 		return StatusServerError, &List{
 			Code:    ErrorDatabaseDelete,
 			Message: "获取收藏列表失败",
@@ -479,7 +504,7 @@ func (this *FileUC) CollectionFile(ctx *gin.Context) (int, *Response) {
 		}
 	}
 	//获取收藏目录的ID
-	ff,err := fr.FindFileByFilename(fcr.Username,"/@")
+	ff, err := fr.FindFileByFilename(fcr.Username, "/@")
 	if err != nil {
 		return StatusClientError, &Response{
 			Code:    ErrorParameterDefect,

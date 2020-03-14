@@ -69,6 +69,8 @@ func admin(router *gin.Engine) {
 		admin.GET("/user/count", handler.Census)
 		//用户禁用
 		admin.GET("/user/disabled", handler.DisabledUser)
+		//用户修改组别
+		admin.GET("/user/group/update", handler.UserGroupUpdate)
 		//添加组
 		admin.POST("/group/add", handler.AddGroup)
 		//删除组
@@ -94,6 +96,8 @@ func file(router *gin.Engine) {
 		file.GET("/delete", handler.DeleteFile)
 		// 删除文件夹
 		file.GET("/delete/dir", handler.DeleteDir)
+		//移动文件
+		file.GET("/move", handler.MoveFile)
 		//重命名文件
 		file.GET("/rename", handler.RenameFile)
 		//共享文件
@@ -111,11 +115,11 @@ func file(router *gin.Engine) {
 		//查看文件系统使用情况
 		file.GET("/ratio", handler.FileSystemUsageRate)
 		//收藏文件列表
-		file.GET("/collection/list",handler.CollectionList)
+		file.GET("/collection/list", handler.CollectionList)
 		//收藏文件
-		file.POST("/collection",handler.CollectionFile)
+		file.POST("/collection", handler.CollectionFile)
 		//取消收藏
-		file.GET("/collection/cancel",handler.CancelCollection)
+		file.GET("/collection/cancel", handler.CancelCollection)
 	}
 }
 

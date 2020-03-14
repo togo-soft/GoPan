@@ -12,7 +12,7 @@ type User struct {
 	Ak         string `form:"-" json:"ak" xorm:"varchar(16) notnull"`                     //文件 auth_key 与底部存储有关
 	Email      string `form:"email" json:"email" xorm:"varchar(128) notnull unique"`      //邮箱
 	Phone      string `form:"phone" json:"phone" xorm:"varchar(11)"`                      //电话号码
-	CreateTime string `form:"-" json:"create_time" xorm:"created"`                        //注册时间
+	CreateTime string `form:"-" json:"create_time" xorm:"varchar(19)"`                    //注册时间
 	Status     bool   `form:"status" json:"status"`                                       //账户状态
 }
 
