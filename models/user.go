@@ -28,11 +28,21 @@ type UserGroup struct {
 // UserLog 用户行为日志记录
 type UserLog struct {
 	Id               int64     `json:"id"`                                     //主键
-	Uid              int64     `json:"uid"`                                    //用户表外键
+	UserId           int64     `xorm:"index" json:"uid"`                       //用户表外键
 	LastTime         time.Time `json:"last_time"`                              //上次登陆时间
 	CurrentTime      time.Time `json:"current_time"`                           //本次登陆时间记录
 	LastIP           string    `json:"last_ip" xorm:"varchar(46)"`             //上次登陆IP
 	CurrentIP        string    `json:"current_ip" xorm:"varchar(46)"`          //本次登陆IP
+	LastAddress      string    `json:"last_address" xorm:"varchar(128)"`       //上次地址
+	CurrentAddress   string    `json:"current_address" xorm:"varchar(128)"`    //本次地址
 	LastUserAgent    string    `json:"last_user_agent" xorm:"varchar(128)"`    //上次UserAgent
 	CurrentUserAgent string    `json:"current_user_agent" xorm:"varchar(128)"` //本次UserAgent
+	LastOperate      string    `json:"last_operate" xorm:"varchar(32)"`        //进行的操作
+	CurrentOperate   string    `json:"current_operate" xorm:"varchar(32)"`     //本次操作
+}
+
+// UserAndLog
+type UserAndLog struct {
+	User    `xorm:"extends"`
+	UserLog `xorm:"extends"`
 }

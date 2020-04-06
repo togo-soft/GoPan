@@ -39,6 +39,13 @@ type UserInterface interface {
 	DisabledUser(ctx *gin.Context) (int, *Response)
 	//修改用户的组
 	UserGroupUpdate(ctx *gin.Context) (int, *Response)
+
+	//查询单条日志
+	QueryLog(ctx *gin.Context) (int, *Response)
+	//查询日志列表
+	QueryLogList(ctx *gin.Context) (int, *List)
+	//管理员重置用户密码
+	AdminResetPassword(ctx *gin.Context) (int, *Response)
 }
 
 // GroupInterface 组接口

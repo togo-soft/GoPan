@@ -29,9 +29,10 @@ type Environments struct {
 
 // User 用户配置项
 type User struct {
-	ResetExpire int64  `yaml:"reset_expires"` //验证码有效期
-	Salt        string `yaml:"salt"`          //程式通用盐
-	AdminToken  string `yaml:"admin_token"`   //管理员用的唯一标识
+	ResetExpire     int64  `yaml:"reset_expires"`    //验证码有效期
+	Salt            string `yaml:"salt"`             //程式通用盐
+	AdminToken      string `yaml:"admin_token"`      //管理员用的唯一标识
+	DefaultPassword string `yaml:"default_password"` //默认重置密码
 }
 
 // Driver 定义了数据库的连接信息 以 data-source-name 方式连接

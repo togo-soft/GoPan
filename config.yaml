@@ -13,6 +13,8 @@ environments:
     salt: R29QYW4=
     # 管理员密钥
     admin_token: deaKjybmuvXLbo+DXnR8qSL9WYl5UDw0ij017GdCPaU=
+    # 用户默认重置密码
+    default_password: abcd1234
   # JWT配置项
   jwt:
     # 自定义签名密钥 在任何场景都不应该流露
@@ -29,21 +31,21 @@ environments:
     # MySQL Data Source Name
     # docker: docker run -it -d --name mysql  -p 33060:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=gopan mysql:latest --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
     #dsn: root:root@tcp(192.168.1.201:33060)/gopan?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local
-    dsn: root:root@tcp(192.168.3.21:33060)/gopan?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local
+    dsn: root:root@tcp(192.168.1.201:33060)/gopan?charset=utf8mb4&collation=utf8mb4_general_ci&parseTime=True&loc=Local
     # 是否开启 ORM 的调试
     debug: true
   mongodb:
     # MongoDB Data Source Name
     # docker: docker run --name mongo -it -d -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=root -p 27017:27017 mongo:latest
     #dsn: mongodb://root:root@127.0.0.1:27017
-    dsn: mongodb://root:root@192.168.3.21:27017
+    dsn: mongodb://root:root@192.168.1.201:27017
     # 是否开启 MongoDB 的调试信息
     debug: true
   redis:
     # Redis Data Source Name
     # docker: docker run -d --name redis -p 6379:6379 redis --requirepass "root"
     # 填写格式: password@database@host:port database:0-15
-    dsn: root@0@192.168.3.21:6379
+    dsn: root@0@192.168.1.201:6379
     # 是否开启 Redis 的调试信息
     debug: true
   # 文件相关配置项 项目运行后不可再修改 否则导致已经加密的文件无法解密
@@ -53,7 +55,7 @@ environments:
     # 密钥轮转次数 文件密钥通过 PBKDF2 将salt hash进行iter次重复计算后返回32位的密钥 iter太大会影响效率
     iter: 1024
     # 文件系统配置项
-    dfs: http://192.168.3.23:8080/group1
+    dfs: http://192.168.1.201:8080/group1
   # 邮件服务功能配置
   email:
     # 邮件发送服务STMP地址 host

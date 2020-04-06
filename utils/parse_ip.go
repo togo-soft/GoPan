@@ -71,5 +71,4 @@ func IpGeolocation(ip string) string {
 	} else {
 		return "未知的地址"
 	}
-	return "未知的地址"
 }

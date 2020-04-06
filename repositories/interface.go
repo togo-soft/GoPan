@@ -38,6 +38,7 @@ type UserRepoInterface interface {
 	DisabledUser(int64, bool) error
 }
 
+// GroupRepoInterface 用户组结构
 type GroupRepoInterface interface {
 	//添加组
 	AddGroup(*models.UserGroup) (int64, error)
@@ -47,6 +48,18 @@ type GroupRepoInterface interface {
 	DeleteGroup(int64) (int64, error)
 	//罗列组
 	GroupList() ([]*models.UserGroup, error)
+}
+
+// LogRepoInterface 行为日志接口
+type LogRepoInterface interface {
+	//查询
+	QueryLog(int64) (*models.UserLog, error)
+	//添加
+	AddLog(*models.UserLog) (int64, error)
+	//修改
+	UpdateLog(*models.UserLog) (int64, error)
+	//罗列
+	LogList() ([]models.UserAndLog, error)
 }
 
 // FileRepoInterface 文件操作接口

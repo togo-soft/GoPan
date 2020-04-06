@@ -15,7 +15,7 @@ import (
 type UserUC struct {
 }
 
-// ur 是仓库存储层的一个实例
+// ur 是仓库存储层的用户实例
 var ur = repositories.NewUserRepo()
 
 // NewUserUC 会返回实例层用户模块的实例
@@ -92,6 +92,8 @@ func (this *UserUC) SignUp(ctx *gin.Context) (int, *Response) {
 		}
 	} else {
 		//操作成功
+		//写用户日志
+		go AddLog(id, ctx.Request, "注册")
 		return StatusOK, &Response{
 			Code:    StatusOK,
 			Message: "用户注册成功!",
@@ -128,6 +130,8 @@ func (this *UserUC) SignIn(ctx *gin.Context) (int, *Response) {
 			//登陆成功
 			token := middleware.NewJWT().NewToken(user.Id, user.Username, user.Email, user.Phone)
 			//todo 更新user行为信息
+			//写用户日志
+			go UpdateLog(user.Id, ctx.Request, "登录")
 			//将token在data中返回
 			return StatusOK, &Response{
 				Code:    StatusOK,
@@ -222,6 +226,7 @@ func (this *UserUC) Forget2ResetPassword(ctx *gin.Context) (int, *Response) {
 			Message: "数据库插入失败",
 		}
 	}
+	go UpdateLog(user.Id, ctx.Request, "修改密码")
 	return StatusOK, &Response{
 		Code:    StatusOK,
 		Message: "操作成功",
@@ -430,7 +435,7 @@ func (this *UserUC) UserGroupUpdate(ctx *gin.Context) (int, *Response) {
 			Message: "参数缺失",
 		}
 	}
-	if err := fr.UpdateFileStorage(username,utils.ParseStringToFloat64(role));err != nil {
+	if err := fr.UpdateFileStorage(username, utils.ParseStringToFloat64(role)); err != nil {
 		return StatusServerError, &Response{
 			Code:    ErrorDatabaseUpdate,
 			Message: "数据库操作出错",
@@ -440,5 +445,81 @@ func (this *UserUC) UserGroupUpdate(ctx *gin.Context) (int, *Response) {
 	return StatusOK, &Response{
 		Code:    StatusOK,
 		Message: "ok",
+	}
+}
+
+// QueryLog 查询日志
+func (this *UserUC) QueryLog(ctx *gin.Context) (int, *Response) {
+	uid := utils.ParseStringToInt64(ctx.Request.Header.Get("uid"))
+	if uid == 0 {
+		return StatusServerError, &Response{
+			Code:    ErrorParseRemote,
+			Message: "服务端解析出错",
+		}
+	}
+	if log, err := ulr.QueryLog(uid); err != nil {
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseQuery,
+			Message: "数据库查询失败",
+		}
+	} else {
+		return StatusOK, &Response{
+			Code:    StatusOK,
+			Message: "ok",
+			Data:    log,
+		}
+	}
+}
+
+// LogList 日志列表
+func (this *UserUC) QueryLogList(ctx *gin.Context) (int, *List) {
+	list, err := ulr.LogList()
+	if err != nil {
+		panic("报错啦:" + err.Error())
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseQuery,
+			Message: "数据库查询出错:" + err.Error(),
+		}
+	}
+	return StatusOK, &List{
+		Code:    StatusOK,
+		Message: "ok",
+		Data:    list,
+	}
+}
+
+// AdminResetPassword 管理员对用户进行密码重置
+func (this *UserUC) AdminResetPassword(ctx *gin.Context) (int, *Response) {
+	qid := ctx.Query("id")
+	if qid == "" {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "解析参数错误",
+		}
+	}
+	id := utils.ParseStringToInt64(qid)
+	//检测用户存不存在
+	u := ur.FindOneById(id)
+	if u == nil {
+		return StatusClientError, &Response{
+			Code:    ErrorParameterParse,
+			Message: "解析参数错误,用户不存在",
+		}
+	}
+	h := sha256.New()
+	h.Write([]byte(utils.GetConfig().User.DefaultPassword))
+	u.Password = hex.EncodeToString(h.Sum(nil))
+	if id, err := ur.Update(u); err != nil {
+		//插入数据库失败
+		return StatusServerError, &Response{
+			Code:    ErrorDatabaseUpdate,
+			Message: "数据库操作出错",
+		}
+	} else {
+		//操作成功
+		return StatusOK, &Response{
+			Code:    StatusOK,
+			Message: utils.ParseInt64ToString(id),
+		}
 	}
 }

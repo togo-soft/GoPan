@@ -83,6 +83,21 @@ func DisabledUser(this *gin.Context) {
 }
 
 // UserGroupUpdate 修改用户分组
-func UserGroupUpdate(this *gin.Context)  {
+func UserGroupUpdate(this *gin.Context) {
 	this.JSON(uuc.UserGroupUpdate(this))
+}
+
+// UserLog 查询日志
+func UserLog(this *gin.Context) {
+	this.JSON(uuc.QueryLog(this))
+}
+
+// LogList 查询日志列表
+func LogList(this *gin.Context) {
+	this.JSON(uuc.QueryLogList(this))
+}
+
+// AdminResetPassword 管理员重置用户密码
+func AdminResetPassword(this *gin.Context) {
+	this.JSON(uuc.AdminResetPassword(this))
 }

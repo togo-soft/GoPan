@@ -7,7 +7,7 @@ import (
 	"server/utils"
 )
 
-// UserUC 是用户实例层的一个结构 用来实现用户接口 UserInterface
+// GroupUC 是用户实例层的一个结构 用来实现用户接口 GroupInterface
 type GroupUC struct {
 }
 

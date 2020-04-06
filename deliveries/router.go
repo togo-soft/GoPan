@@ -55,6 +55,8 @@ func user(router *gin.Engine) {
 		user.GET("/logout", handler.Cancellation)
 		//用户信息更新功能
 		user.POST("/update", handler.ModifyInformation)
+		//用户查看自己的一条日志
+		user.GET("/log", handler.UserLog)
 	}
 }
 
@@ -79,6 +81,10 @@ func admin(router *gin.Engine) {
 		admin.POST("/group/update", handler.UpdateGroup)
 		//组列表
 		admin.GET("/group/list", handler.GroupList)
+		//日志列表
+		admin.GET("/log/list", handler.LogList)
+		//管理员重置普通用户密码
+		admin.GET("/user/reset", handler.AdminResetPassword)
 	}
 }
 
