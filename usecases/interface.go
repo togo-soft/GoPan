@@ -78,6 +78,8 @@ type FileInterface interface {
 	ShareList(ctx *gin.Context) (int, *List)
 	//第三方查看列表
 	OTTHShareFile(ctx *gin.Context) (int, *List)
+	//第三方查询用户共享列表
+	UserOTTHShareList(ctx *gin.Context) (int, *List)
 	//共享文件
 	ShareFile(ctx *gin.Context) (int, *Response)
 	//取消共享文件

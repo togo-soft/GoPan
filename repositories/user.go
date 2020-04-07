@@ -85,13 +85,11 @@ func (this *UserRepo) FindOneById(id int64) *models.User {
 	return u
 }
 
-// FindOneByField 根据已有字段 查询用户信息
-func (this *UserRepo) FindOneByField(u *models.User) *models.User {
-	_, err := engine.Where("username = ?", u.Username).Or("email = ?", u.Email).Or("phone = ?", u.Phone).Get(u)
-	if err != nil {
-		log.Fatal("find user error:", err)
-	}
-	return u
+// FindOneByUsernameOrSid 根据已有字段 查询用户信息
+func (this *UserRepo) FindOneByUsernameOrSid(field string) (*models.User, error) {
+	var user = new(models.User)
+	_, err := engine.Where("username = ?", field).Or("sid = ?", field).Get(user)
+	return user, err
 }
 
 // RecordExist 根据用户登陆时的名称和密码 检测user信息是否存在 并返回user信息和是否存在记录

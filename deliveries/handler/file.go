@@ -96,3 +96,8 @@ func CollectionFile(this *gin.Context) {
 func CancelCollection(this *gin.Context) {
 	this.JSON(fuc.CancelCollection(this))
 }
+
+// UserOTTHShareList 查询用户的共享列表
+func UserOTTHShareList(this *gin.Context) {
+	this.JSON(fuc.UserOTTHShareList(this))
+}

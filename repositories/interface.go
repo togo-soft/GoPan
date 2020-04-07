@@ -19,7 +19,7 @@ type UserRepoInterface interface {
 	//根据id查询单个用户接口
 	FindOneById(id int64) *models.User
 	//根据字段查询用户信息接口
-	FindOneByField(u *models.User) *models.User
+	FindOneByUsernameOrSid(field string) (*models.User, error)
 	//登陆时记录是否存在
 	LoginExist(name, password string) (bool, *models.User)
 	//检测对象是否存在

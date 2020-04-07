@@ -6,6 +6,7 @@ import "time"
 type User struct {
 	Id         int64  `form:"id" json:"id"`
 	Username   string `form:"username" json:"username" xorm:"varchar(32) notnull unique"` //用户名
+	Sid        string `form:"sid" json:"sid" xorm:"index varchar(16) notnull unique"`     //学生或者教师的学号工号
 	Password   string `form:"password" json:"-" xorm:"varchar(64) notnull"`               //密码
 	Fk         string `form:"-" json:"fk" xorm:"varchar(32) notnull"`                     //文件密钥
 	Iv         string `form:"-" json:"iv" xorm:"varchar(32) notnull"`                     //文件密钥对应的IV向量

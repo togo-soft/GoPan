@@ -530,3 +530,33 @@ func (this *FileUC) CollectionFile(ctx *gin.Context) (int, *Response) {
 		Message: "ok",
 	}
 }
+
+func (this *FileUC) UserOTTHShareList(ctx *gin.Context) (int, *List) {
+	args := ctx.Query("args")
+	if args == "" {
+		return StatusClientError, &List{
+			Code:    ErrorParameterDefect,
+			Message: "参数缺失",
+		}
+	}
+	if u, err := ur.FindOneByUsernameOrSid(args); err != nil {
+		return StatusServerError, &List{
+			Code:    ErrorDatabaseQuery,
+			Message: err,
+		}
+	} else {
+		if list, err := fr.ShareList(u.Username); err != nil {
+			return StatusServerError, &List{
+				Code:    ErrorDatabaseQuery,
+				Message: err,
+			}
+		} else {
+			return StatusOK, &List{
+				Code:    StatusOK,
+				Count:   len(list),
+				Message: "ok",
+				Data:    list,
+			}
+		}
+	}
+}

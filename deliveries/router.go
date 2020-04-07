@@ -27,6 +27,8 @@ func InitRouter() *gin.Engine {
 		general.GET("/reset/check", handler.CheckUUID)
 		//某共享列表 otth[on the third hand]:第三方的
 		general.GET("/share", handler.OTTHShareList)
+		//查询用户共享列表
+		general.GET("/share/user", handler.UserOTTHShareList)
 		//管理员登录认证
 		general.POST("/admin", handler.AuthAdminToken)
 	}
@@ -126,14 +128,5 @@ func file(router *gin.Engine) {
 		file.POST("/collection", handler.CollectionFile)
 		//取消收藏
 		file.GET("/collection/cancel", handler.CancelCollection)
-	}
-}
-
-// secure 安全相关路由 暂时先不设置 jwt认证
-func secure(router *gin.Engine) {
-	var secure = router.Group("/api/secure")
-	{
-		secure.GET("/get", handler.GetSecretToken)
-		secure.GET("/parse", handler.ParseSecretToken)
 	}
 }
