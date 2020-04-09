@@ -21,7 +21,7 @@ func (this *LogRepo) UpdateLog(log *models.UserLog) (int64, error) {
 
 func (this *LogRepo) QueryLog(id int64) (*models.UserLog, error) {
 	var log = &models.UserLog{}
-	if _, err := engine.Where("uid = ?", id).Get(log); err != nil {
+	if _, err := engine.Where("user_id = ?", id).Get(log); err != nil {
 		return nil, err
 	}
 	return log, nil

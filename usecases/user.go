@@ -142,7 +142,7 @@ func (this *UserUC) SignIn(ctx *gin.Context) (int, *Response) {
 			//登陆失败
 			return StatusServerError, &Response{
 				Code:    ErrorDatabaseQuery,
-				Message: "数据库未找到该记录",
+				Message: "用户名或密码不正确",
 			}
 		}
 	} else {
@@ -312,6 +312,11 @@ func (this *UserUC) ModifyInformation(ctx *gin.Context) (int, *Response) {
 			Message: "解析参数错误",
 		}
 	}
+	//密码处理
+	h := sha256.New()
+	h.Write([]byte(user.Password))
+	user.Password = hex.EncodeToString(h.Sum(nil))
+
 	if id, err := ur.Update(user); err != nil {
 		//插入数据库失败
 		return StatusServerError, &Response{
@@ -461,6 +466,7 @@ func (this *UserUC) QueryLog(ctx *gin.Context) (int, *Response) {
 		return StatusServerError, &Response{
 			Code:    ErrorDatabaseQuery,
 			Message: "数据库查询失败",
+			Data:    err,
 		}
 	} else {
 		return StatusOK, &Response{

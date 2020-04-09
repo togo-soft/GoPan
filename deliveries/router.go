@@ -53,8 +53,6 @@ func user(router *gin.Engine) {
 		user.GET("/profile", handler.Profile)
 		//用户帐号注销功能
 		user.GET("/cancellation", handler.Cancellation)
-		//用户退出登录功能
-		user.GET("/logout", handler.Cancellation)
 		//用户信息更新功能
 		user.POST("/update", handler.ModifyInformation)
 		//用户查看自己的一条日志

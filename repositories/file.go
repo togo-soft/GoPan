@@ -133,7 +133,7 @@ func (this *FileRepo) ShareFile(username string, id primitive.ObjectID, fsk stri
 func (this *FileRepo) CancelShare(username string, id primitive.ObjectID) error {
 	collection := mgo.Database("file").Collection(username)
 	filter := bson.D{{"id", id}}
-	update := bson.D{{"$set", bson.D{{"isshare", false}}}}
+	update := bson.D{{"$set", bson.D{{"isshare", false}, {"fsk", ""}}}}
 	if _, err := collection.UpdateOne(ctx, filter, update); err != nil {
 		return err
 	}
